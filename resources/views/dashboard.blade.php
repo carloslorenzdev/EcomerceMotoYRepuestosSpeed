@@ -1,4 +1,4 @@
-<x-layouts::app :title="'Mi Panel'">
+<x-layouts::client :title="'Mi Panel'">
     <div class="max-w-6xl mx-auto px-4 py-8">
         
         <!-- Welcome header -->
@@ -182,4 +182,4 @@
         @endif
 
     </div>
-</x-layouts::app>
+</x-layouts::client>
