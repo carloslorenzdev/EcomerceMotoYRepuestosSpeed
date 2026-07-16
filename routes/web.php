@@ -24,7 +24,8 @@ Route::middleware(['auth', 'verified'])->get('dashboard', function () {
     if (auth()->user()->isAdmin()) {
         return redirect()->route('admin.dashboard');
     }
-    return view('dashboard');
+    $orders = auth()->user()->orders()->with('items.product')->latest()->get();
+    return view('dashboard', compact('orders'));
 })->name('dashboard');
 
 // Administrative Panel Routes (Protected)

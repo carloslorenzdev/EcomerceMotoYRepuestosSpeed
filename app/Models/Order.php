@@ -17,6 +17,8 @@ class Order extends Model
         'total',
         'payment_gateway',
         'payment_id',
+        'shipping_status',
+        'shipping_tracking_number',
         'shipping_address',
         'customer_name',
         'customer_email',

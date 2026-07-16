@@ -70,6 +70,14 @@ class Orders extends Component
             'shipping_tracking_number' => $this->shipping_tracking_number,
         ]);
 
+        // Send email status update
+        try {
+            \Illuminate\Support\Facades\Mail::to($order->customer_email)
+                ->send(new \App\Mail\OrderStatusMail($order));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send order status email for Order #{$order->id}: " . $e->getMessage());
+        }
+
         $this->isDetailModalOpen = false;
 
         session()->flash('toast', [
