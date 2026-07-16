@@ -113,6 +113,69 @@
 
                         <!-- Card Body -->
                         <div class="p-5">
+                            <!-- Shipping Progress Bar -->
+                            <div class="mb-8 px-4">
+                                <div class="relative flex items-center justify-between">
+                                    <!-- Progress Line Background -->
+                                    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-150 dark:bg-neutral-800 -z-10 rounded-full"></div>
+                                    
+                                    <!-- Active Progress Line -->
+                                    @php
+                                        $width = '0%';
+                                        $status = $order->shipping_status ?? 'pendiente';
+                                        if ($status === 'pendiente' || $status === 'con_direccion') $width = '12%';
+                                        if ($status === 'procesando') $width = '50%';
+                                        if ($status === 'enviado') $width = '80%';
+                                        if ($status === 'entregado') $width = '100%';
+                                    @endphp
+                                    <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-orange-600 -z-10 rounded-full transition-all duration-500" style="width: {{ $width }}"></div>
+
+                                    <!-- Step 1: Registrado -->
+                                    <div class="flex flex-col items-center">
+                                        <div class="size-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ in_array($status, ['pendiente', 'con_direccion', 'procesando', 'enviado', 'entregado']) ? 'bg-orange-600 text-white shadow-xs shadow-orange-600/30' : 'bg-gray-200 dark:bg-neutral-850 text-gray-500' }}">
+                                            @if(in_array($status, ['procesando', 'enviado', 'entregado']))
+                                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                            @else
+                                                1
+                                            @endif
+                                        </div>
+                                        <span class="text-[10px] md:text-xs font-bold mt-2 text-gray-700 dark:text-neutral-300">Pedido Recibido</span>
+                                    </div>
+
+                                    <!-- Step 2: Preparando -->
+                                    <div class="flex flex-col items-center">
+                                        <div class="size-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ in_array($status, ['procesando', 'enviado', 'entregado']) ? 'bg-orange-600 text-white shadow-xs shadow-orange-600/30' : 'bg-gray-250 dark:bg-neutral-850 text-gray-400 dark:text-neutral-500' }}">
+                                            @if(in_array($status, ['enviado', 'entregado']))
+                                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                            @else
+                                                2
+                                            @endif
+                                        </div>
+                                        <span class="text-[10px] md:text-xs font-bold mt-2 {{ in_array($status, ['procesando', 'enviado', 'entregado']) ? 'text-gray-700 dark:text-neutral-300 font-extrabold' : 'text-gray-400 dark:text-neutral-500' }}">En Preparación</span>
+                                    </div>
+
+                                    <!-- Step 3: En camino -->
+                                    <div class="flex flex-col items-center">
+                                        <div class="size-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ in_array($status, ['enviado', 'entregado']) ? 'bg-orange-600 text-white shadow-xs shadow-orange-600/30' : 'bg-gray-250 dark:bg-neutral-850 text-gray-400 dark:text-neutral-500' }}">
+                                            @if($status === 'entregado')
+                                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                            @else
+                                                3
+                                            @endif
+                                        </div>
+                                        <span class="text-[10px] md:text-xs font-bold mt-2 {{ in_array($status, ['enviado', 'entregado']) ? 'text-gray-700 dark:text-neutral-300 font-extrabold' : 'text-gray-400 dark:text-neutral-500' }}">Despachado</span>
+                                    </div>
+
+                                    <!-- Step 4: Entregado -->
+                                    <div class="flex flex-col items-center">
+                                        <div class="size-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ $status === 'entregado' ? 'bg-orange-600 text-white shadow-xs shadow-orange-600/30' : 'bg-gray-250 dark:bg-neutral-850 text-gray-400 dark:text-neutral-500' }}">
+                                            4
+                                        </div>
+                                        <span class="text-[10px] md:text-xs font-bold mt-2 {{ $status === 'entregado' ? 'text-gray-700 dark:text-neutral-300 font-extrabold' : 'text-gray-400 dark:text-neutral-500' }}">Entregado</span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                 
                                 <!-- Column 1: Items purchased -->
