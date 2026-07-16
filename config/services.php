@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    'mercadopago' => [
+        'access_token' => env('MP_ACCESS_TOKEN', env('MERCADOPAGO_ACCESS_TOKEN')),
+        'success_url' => env('MERCADOPAGO_SUCCESS_URL'),
+        'failure_url' => env('MERCADOPAGO_FAILURE_URL'),
+        'pending_url' => env('MERCADOPAGO_PENDING_URL'),
+    ],
+
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
+    ],
+
 ];

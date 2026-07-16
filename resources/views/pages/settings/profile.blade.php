@@ -24,6 +24,12 @@ new #[Title('Profile settings')] class extends Component {
         $this->email = Auth::user()->email;
     }
 
+    public function rendering($view, $data)
+    {
+        $layout = \Illuminate\Support\Facades\Auth::user()?->isAdmin() ? 'layouts.admin' : 'layouts.app';
+        $view->layout($layout);
+    }
+
     /**
      * Update the profile information for the currently authenticated user.
      */

@@ -4,7 +4,11 @@ use Livewire\Component;
 use Livewire\Attributes\Title;
 
 new #[Title('Appearance settings')] class extends Component {
-    //
+    public function rendering($view, $data)
+    {
+        $layout = \Illuminate\Support\Facades\Auth::user()?->isAdmin() ? 'layouts.admin' : 'layouts.app';
+        $view->layout($layout);
+    }
 }; ?>
 
 <section class="w-full">
