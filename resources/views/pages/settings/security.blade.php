@@ -63,6 +63,12 @@ new #[Title('Security settings')] class extends Component {
         }
     }
 
+    public function rendering($view, $data)
+    {
+        $layout = \Illuminate\Support\Facades\Auth::user()?->isAdmin() ? 'layouts.admin' : 'layouts.app';
+        $view->layout($layout);
+    }
+
     /**
      * Update the password for the currently authenticated user.
      */
