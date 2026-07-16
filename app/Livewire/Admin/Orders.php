@@ -60,21 +60,64 @@ class Orders extends Component
     }
 
     /**
-     * Save shipping update.
+     * Quick status update.
      */
-    public function saveShippingUpdate()
+    public function updateShippingStatus($orderId, $status)
     {
-        $order = Order::findOrFail($this->selectedOrderId);
-        $order->update([
-            'shipping_status' => $this->shipping_status,
-            'shipping_tracking_number' => $this->shipping_tracking_number,
-        ]);
+        $order = Order::findOrFail($orderId);
+        
+        $updateData = ['shipping_status' => $status];
+        if ($status !== 'enviado' && $status !== 'entregado') {
+            $updateData['shipping_tracking_number'] = null;
+            $this->shipping_tracking_number = '';
+        }
 
-        $this->isDetailModalOpen = false;
+        $order->update($updateData);
+
+        // Send email status update
+        try {
+            \Illuminate\Support\Facades\Mail::to($order->customer_email)
+                ->send(new \App\Mail\OrderStatusMail($order));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send order status email for Order #{$order->id}: " . $e->getMessage());
+        }
+
+        if ($this->selectedOrderId == $orderId) {
+            $this->shipping_status = $status;
+        }
 
         session()->flash('toast', [
             'type' => 'success',
-            'message' => 'Información de despacho actualizada exitosamente.',
+            'message' => 'Estado del pedido actualizado a "' . ucfirst($status) . '" exitosamente.',
+        ]);
+    }
+
+    /**
+     * Mark order as shipped.
+     */
+    public function markAsShipped($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+        $order->update([
+            'shipping_status' => 'enviado',
+            'shipping_tracking_number' => $this->shipping_tracking_number,
+        ]);
+
+        // Send email status update
+        try {
+            \Illuminate\Support\Facades\Mail::to($order->customer_email)
+                ->send(new \App\Mail\OrderStatusMail($order));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send order status email for Order #{$order->id}: " . $e->getMessage());
+        }
+
+        if ($this->selectedOrderId == $orderId) {
+            $this->shipping_status = 'enviado';
+        }
+
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => 'El pedido fue marcado como Enviado con seguimiento: ' . $this->shipping_tracking_number,
         ]);
     }
 

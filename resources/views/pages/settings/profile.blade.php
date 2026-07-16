@@ -26,7 +26,7 @@ new #[Title('Profile settings')] class extends Component {
 
     public function rendering($view, $data)
     {
-        $layout = \Illuminate\Support\Facades\Auth::user()?->isAdmin() ? 'layouts.admin' : 'layouts.app';
+        $layout = \Illuminate\Support\Facades\Auth::user()?->isAdmin() ? 'layouts.admin' : 'layouts.client';
         $view->layout($layout);
     }
 

@@ -77,6 +77,14 @@ class ProcessMercadoPagoWebhookAction
                             }
                         }
                         Log::info("Order ID {$order->id} updated to 'paid' and stock adjusted.");
+
+                        // Send confirmation email
+                        try {
+                            \Illuminate\Support\Facades\Mail::to($order->customer_email)
+                                ->send(new \App\Mail\OrderConfirmationMail($order));
+                        } catch (\Exception $e) {
+                            Log::error("Failed to send order confirmation email for Order #{$order->id}: " . $e->getMessage());
+                        }
                     }
                 });
             } elseif (in_array($status, ['rejected', 'cancelled', 'refunded'])) {

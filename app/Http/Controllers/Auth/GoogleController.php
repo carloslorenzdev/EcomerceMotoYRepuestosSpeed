@@ -16,7 +16,9 @@ class GoogleController extends Controller
      */
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->with(['prompt' => 'select_account consent'])
+            ->redirect();
     }
 
     /**
@@ -39,7 +41,9 @@ class GoogleController extends Controller
                     'name' => $googleUser->getName() ?? $googleUser->getNickname() ?? 'Usuario Google',
                     'email' => $googleUser->getEmail(),
                     'password' => Hash::make(Str::random(24)),
-                    'role' => 'client', // client role
+                    'role' => 'client',
+                    'password_set' => false,
+                    'google_id' => $googleUser->getId(),
                 ]);
 
                 Auth::login($user);

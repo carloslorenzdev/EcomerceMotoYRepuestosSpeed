@@ -225,39 +225,77 @@
                             </div>
                         </div>
 
-                        <!-- Update Shipping Form -->
-                        <form wire:submit.prevent="saveShippingUpdate" class="border-t border-gray-100 dark:border-neutral-800 pt-6 space-y-4">
-                            <h4 class="text-xs font-bold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">Estado de Despacho</h4>
+                        <!-- Update Shipping Buttons -->
+                        <div class="border-t border-gray-100 dark:border-neutral-800 pt-6 space-y-4">
+                            <h4 class="text-xs font-bold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">Acciones rápidas de Despacho</h4>
                             
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Estado Despacho</label>
-                                    <select wire:model="shipping_status" 
-                                            class="w-full px-3 py-2.5 text-xs rounded-xl border border-gray-200 bg-white text-gray-800 dark:border-neutral-750 dark:bg-neutral-800 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-orange-500">
-                                        <option value="pendiente">Pendiente</option>
-                                        <option value="enviado">Enviado</option>
-                                        <option value="entregado">Entregado</option>
-                                    </select>
-                                </div>
+                            <div class="flex flex-wrap items-center gap-3">
+                                @php
+                                    $status = $selectedOrder->shipping_status ?? 'pendiente';
+                                    $isPaid = $selectedOrder->status === 'paid';
+                                    $hasAddress = is_array($selectedOrder->shipping_address) && !empty($selectedOrder->shipping_address['street']);
+                                @endphp
 
-                                <div>
-                                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Número de Seguimiento (Tracking ID)</label>
-                                    <input type="text" wire:model="shipping_tracking_number" 
-                                           placeholder="Ej: Starken #9382103"
-                                           class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-200 bg-white text-gray-800 dark:border-neutral-750 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-orange-500">
-                                </div>
+                                @if($isPaid)
+                                    @if($status === 'pendiente' || $status === 'con_direccion')
+                                        <button type="button" wire:click="updateShippingStatus({{ $selectedOrder->id }}, 'procesando')"
+                                                class="inline-flex items-center gap-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl transition shadow-sm">
+                                            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                            </svg>
+                                            Preparar pedido
+                                        </button>
+                                    @endif
+
+                                    @if($status === 'procesando' || $status === 'con_direccion' || $status === 'pendiente')
+                                        <div class="flex items-center gap-2 border border-gray-100 dark:border-neutral-800 p-2 rounded-xl bg-gray-50/50 dark:bg-neutral-950/20">
+                                            <input type="text" wire:model="shipping_tracking_number" 
+                                                   placeholder="Código de Seguimiento (Ej: Starken #9382103)"
+                                                   class="px-3 py-1.5 text-xs rounded-lg border border-gray-250 bg-white text-gray-800 dark:border-neutral-750 dark:bg-neutral-850 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-orange-500 w-60">
+                                            <button type="button" wire:click="markAsShipped({{ $selectedOrder->id }})"
+                                                    @if(!$hasAddress) disabled @endif
+                                                    title="{{ !$hasAddress ? 'El cliente aún no ha registrado su dirección de envío.' : '' }}"
+                                                    class="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                                </svg>
+                                                Marcar Enviado
+                                            </button>
+                                        </div>
+                                    @endif
+
+                                    @if($status === 'enviado')
+                                        <button type="button" wire:click="updateShippingStatus({{ $selectedOrder->id }}, 'entregado')"
+                                                class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-sm">
+                                            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Confirmar entrega
+                                        </button>
+                                    @endif
+
+                                    @if($status === 'entregado')
+                                        <span class="inline-flex items-center gap-2 px-4 py-2.5 border border-emerald-200 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 text-xs font-bold rounded-xl">
+                                            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            Pedido entregado con éxito
+                                        </span>
+                                    @endif
+                                @else
+                                    <span class="text-xs text-amber-600 dark:text-amber-500 font-bold bg-amber-50 dark:bg-amber-950/20 p-2.5 rounded-xl border border-amber-200 dark:border-amber-900/30">
+                                        El pago aún no ha sido aprobado por Mercado Pago. No se pueden procesar despachos.
+                                    </span>
+                                @endif
                             </div>
 
                             <!-- Modal Actions Footer -->
                             <div class="flex justify-end gap-3 pt-4 border-t border-gray-150 dark:border-neutral-800">
-                                <button type="button" @click="openModal = false" class="px-4 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-neutral-750 dark:bg-neutral-800 dark:text-neutral-300 transition-colors">
-                                    Cerrar
-                                </button>
-                                <button type="submit" class="px-5 py-2 text-xs font-bold rounded-xl bg-orange-600 hover:bg-orange-700 text-white transition-colors">
-                                    Guardar Cambios de Despacho
+                                <button type="button" @click="openModal = false" class="px-5 py-2.5 text-xs font-bold rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-neutral-750 dark:bg-neutral-800 dark:text-neutral-300 transition-colors">
+                                    Cerrar Detalles
                                 </button>
                             </div>
-                        </form>
+                        </div>
 
                     </div>
                 </div>

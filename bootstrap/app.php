@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'webhooks/*',
         ]);
 
+        $middleware->web(append: [
+            \App\Http\Middleware\RedirectIfPasswordNotSet::class,
+        ]);
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
         ]);
