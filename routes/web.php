@@ -16,6 +16,11 @@ Route::get('servicios', Services::class)->name('services');
 Route::get('auth/google', [\App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('auth/google/callback', [\App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
+// Set Password Flow (Google users)
+Route::middleware(['auth'])->group(function () {
+    Route::get('set-password', \App\Livewire\Auth\SetPassword::class)->name('password.set');
+});
+
 // Webhook Routes (CSRF Excluded)
 Route::post('webhooks/relbase', RelBaseWebhookController::class)->name('webhooks.relbase');
 Route::post('webhooks/mercadopago', MercadoPagoWebhookController::class)->name('webhooks.mercadopago');
