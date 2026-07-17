@@ -68,7 +68,7 @@ class Shop extends Component
             'min_price' => $this->minPrice !== '' ? (float) $this->minPrice : null,
             'max_price' => $this->maxPrice !== '' ? (float) $this->maxPrice : null,
             'sort_by' => $this->sortBy,
-        ])->paginate(12);
+        ])->paginate(9);
 
         return view('livewire.store.shop', [
             'products' => $products,

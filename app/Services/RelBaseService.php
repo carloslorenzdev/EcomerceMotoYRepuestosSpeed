@@ -209,6 +209,111 @@ class RelBaseService
     }
 
     /**
+     * Fetch a single product from RelBase and sync it locally.
+     */
+    public function syncProductById(string $relbaseId): bool
+    {
+        $accessToken = $this->getValidToken();
+        if (!$accessToken) {
+            Log::error("[RelBaseService] Missing token to sync product $relbaseId");
+            return false;
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => "Bearer {$accessToken}",
+                'Accept' => 'application/json',
+            ])->get("https://api.relbase.cl/api/v2/productos/{$relbaseId}");
+
+            if ($response->failed()) {
+                Log::warning("[RelBaseService] Product {$relbaseId} not found in API on webhook sync.");
+                return false;
+            }
+
+            $data = $response->json();
+            $p = $data['data'] ?? null;
+            if (!$p) return false;
+
+            // Resolve Category
+            $categoryName = $p['category']['name'] ?? 'Sin Categoría';
+            $categorySlug = Str::slug($categoryName);
+            $category = Category::firstOrCreate(
+                ['slug' => $categorySlug],
+                ['name' => $categoryName, 'description' => "Categoría importada: {$categoryName}"]
+            );
+
+            // Compute Stock
+            $stock = 0;
+            if (!empty($p['inventories']) && is_array($p['inventories'])) {
+                foreach ($p['inventories'] as $inv) {
+                    $stock += $inv['stock'] ?? 0;
+                }
+            }
+
+            // Compute Price
+            $price = $p['is_tax_affected'] ? round(($p['price'] ?? 0) * 1.19) : round($p['price'] ?? 0);
+            $comparePrice = !empty($p['price_sale']) ? ($p['is_tax_affected'] ? round($p['price_sale'] * 1.19) : round($p['price_sale'])) : null;
+
+            // Resolve Images
+            $images = [];
+            $relbaseImageUrl = $p['url_image'] ?? ($p['image']['url'] ?? null);
+            if ($relbaseImageUrl) {
+                $images[] = $relbaseImageUrl;
+            }
+
+            $sku = $p['code'] ?? null;
+            if (!$sku) return false;
+
+            $localProduct = Product::where('sku', $sku)
+                ->orWhere('relbase_id', $p['id'])
+                ->first();
+
+            $slug = Str::slug($p['name']);
+            $originalSlug = $slug;
+            $counter = 1;
+            while (Product::where('slug', $slug)->where('sku', '!=', $sku)->exists()) {
+                $slug = "{$originalSlug}-{$counter}";
+                $counter++;
+            }
+
+            if ($localProduct) {
+                $preserveImage = !empty($localProduct->image_url);
+                $localProduct->update([
+                    'relbase_id' => $p['id'],
+                    'name' => $p['name'],
+                    'description' => $localProduct->description ?: ($p['description'] ?? ''),
+                    'price' => $price,
+                    'compare_at_price' => $comparePrice,
+                    'stock' => max(0, (int)$stock),
+                    'image_url' => $preserveImage ? $localProduct->image_url : $images,
+                    'category_id' => $category->id,
+                    'is_active' => $p['enabled'] ?? true,
+                ]);
+            } else {
+                Product::create([
+                    'relbase_id' => $p['id'],
+                    'sku' => $sku,
+                    'name' => $p['name'],
+                    'slug' => $slug,
+                    'description' => $p['description'] ?? '',
+                    'price' => $price,
+                    'compare_at_price' => $comparePrice,
+                    'stock' => max(0, (int)$stock),
+                    'image_url' => $images,
+                    'category_id' => $category->id,
+                    'is_featured' => false,
+                    'is_active' => $p['enabled'] ?? true,
+                ]);
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("[RelBaseService] Exception syncing product {$relbaseId}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Update stock level for a product directly in RelBase.
      */
     public function updateProductStock(string $relbaseId, int $newStock): bool

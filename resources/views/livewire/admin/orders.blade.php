@@ -94,10 +94,19 @@
                             </td>
                             <td class="px-4 py-4 text-center">
                                 <button type="button" wire:click="viewOrderDetails({{ $order->id }})"
+                                        title="Ver detalles"
                                         class="p-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 dark:border-neutral-750 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-orange-950/20 dark:hover:text-orange-500 transition-colors">
                                     <svg class="size-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </button>
+                                <button type="button" wire:click="deleteOrder({{ $order->id }})"
+                                        wire:confirm="¿Estás seguro de eliminar el pedido #{{ $order->id }}? Esta acción borrará el registro para siempre."
+                                        title="Eliminar pedido"
+                                        class="p-1.5 ml-1 rounded-lg border border-gray-200 bg-white text-gray-700 hover:border-red-200 hover:bg-red-50 hover:text-red-600 dark:border-neutral-750 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-red-950/20 dark:hover:text-red-500 transition-colors">
+                                    <svg class="size-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
                                 </button>
                             </td>
@@ -248,20 +257,15 @@
                                     @endif
 
                                     @if($status === 'procesando' || $status === 'con_direccion' || $status === 'pendiente')
-                                        <div class="flex items-center gap-2 border border-gray-100 dark:border-neutral-800 p-2 rounded-xl bg-gray-50/50 dark:bg-neutral-950/20">
-                                            <input type="text" wire:model="shipping_tracking_number" 
-                                                   placeholder="Código de Seguimiento (Ej: Starken #9382103)"
-                                                   class="px-3 py-1.5 text-xs rounded-lg border border-gray-250 bg-white text-gray-800 dark:border-neutral-750 dark:bg-neutral-850 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-orange-500 w-60">
-                                            <button type="button" wire:click="markAsShipped({{ $selectedOrder->id }})"
-                                                    @if(!$hasAddress) disabled @endif
-                                                    title="{{ !$hasAddress ? 'El cliente aún no ha registrado su dirección de envío.' : '' }}"
-                                                    class="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                                </svg>
-                                                Marcar Enviado
-                                            </button>
-                                        </div>
+                                        <button type="button" wire:click="markAsShipped({{ $selectedOrder->id }})"
+                                                @if(!$hasAddress) disabled @endif
+                                                title="{{ !$hasAddress ? 'El cliente aún no ha registrado su dirección de envío.' : '' }}"
+                                                class="inline-flex items-center gap-2 px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                            </svg>
+                                            Marcar Enviado (Tracking Auto)
+                                        </button>
                                     @endif
 
                                     @if($status === 'enviado')

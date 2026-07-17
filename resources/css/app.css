@@ -29,6 +29,16 @@
     --color-accent: var(--color-neutral-800);
     --color-accent-content: var(--color-neutral-800);
     --color-accent-foreground: var(--color-white);
+
+    --animate-softpulse: softpulse 2s ease-in-out infinite;
+    @keyframes softpulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.08);
+        }
+    }
 }
 
 @layer theme {

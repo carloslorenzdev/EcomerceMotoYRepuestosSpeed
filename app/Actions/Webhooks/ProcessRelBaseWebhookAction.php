@@ -2,100 +2,79 @@
 
 namespace App\Actions\Webhooks;
 
-use App\Models\Category;
-use App\Models\Product;
-use Illuminate\Support\Str;
+use App\Services\RelBaseService;
+use Illuminate\Support\Facades\Log;
 
 class ProcessRelBaseWebhookAction
 {
+    protected RelBaseService $relbaseService;
+
+    public function __construct(RelBaseService $relbaseService)
+    {
+        $this->relbaseService = $relbaseService;
+    }
+
     /**
      * Process a RelBase webhook payload.
+     * Extracts all affected product IDs and syncs them.
      *
      * @param array $payload
-     * @return Product|null
+     * @param string|null $event
+     * @return int Number of products processed
      */
-    public function execute(array $payload): ?Product
+    public function execute(array $payload, ?string $event = null): int
     {
-        $event = $payload['event'] ?? 'product.updated';
-        $data = $payload['data'] ?? $payload; // support both wrapped and raw data payloads
+        $productIds = [];
 
-        // RelBase standard SKU field is 'code'
-        $sku = $data['code'] ?? $data['codigo'] ?? $data['sku'] ?? null;
-        if (!$sku) {
-            return null;
+        // 1. Extraer ID del producto si es un evento de actualización directa
+        if (isset($payload['product_id'])) {
+            $productIds[] = (string) $payload['product_id'];
+        } elseif (isset($payload['id']) && str_contains($event ?? '', 'product')) {
+            $productIds[] = (string) $payload['id'];
+        } elseif (isset($payload['data']['id']) && str_contains($event ?? '', 'product')) {
+            $productIds[] = (string) $payload['data']['id'];
         }
 
-        // Resolve category
-        $categoryData = $data['category'] ?? [];
-        $categoryName = $categoryData['name'] ?? $data['categoria'] ?? 'Sin Categoría';
-        $categorySlug = Str::slug($categoryName);
-
-        $category = Category::firstOrCreate(
-            ['slug' => $categorySlug],
-            ['name' => $categoryName]
-        );
-
-        // Map data fields from RelBase
-        $relbaseId = $data['id'] ?? null;
-        $name = $data['name'] ?? $data['nombre'] ?? 'Producto Sincronizado';
-        $description = $data['description'] ?? $data['descripcion'] ?? null;
+        // 2. Extraer IDs si el evento es una venta, factura, boleta, consumo, etc.
+        $items = $payload['details'] ?? $payload['data']['details'] ?? $payload['document']['details'] ?? $payload['items'] ?? $payload['data']['items'] ?? [];
         
-        // RelBase uses price_sale for final sale price, with fallback to price
-        $price = $data['price_sale'] ?? $data['precio'] ?? $data['price'] ?? 0;
-        
-        // Sum stock from all warehouses in inventories array
-        $stock = 0;
-        if (isset($data['inventories']) && is_array($data['inventories'])) {
-            foreach ($data['inventories'] as $inv) {
-                $stock += $inv['stock'] ?? 0;
+        if (is_array($items)) {
+            foreach ($items as $item) {
+                if (isset($item['product_id'])) {
+                    $productIds[] = (string) $item['product_id'];
+                } elseif (isset($item['producto_id'])) {
+                    $productIds[] = (string) $item['producto_id'];
+                } elseif (isset($item['id'])) {
+                    $productIds[] = (string) $item['id'];
+                }
             }
-        } else {
-            $stock = $data['stock'] ?? $data['inventory'] ?? 0;
         }
 
-        // Parse images from image object
-        $images = [];
-        if (isset($data['image']) && is_array($data['image'])) {
-            $imageUrl = $data['image']['url'] ?? null;
-            if ($imageUrl) {
-                $images[] = $imageUrl;
+        // Limpiar duplicados y vacíos
+        $productIds = array_unique(array_filter($productIds, function ($id) {
+            return $id && $id !== 'undefined' && $id !== 'null';
+        }));
+
+        if (empty($productIds)) {
+            Log::warning("[ProcessRelBaseWebhookAction] No se encontró un ID de producto en el payload para el evento: {$event}");
+            return 0;
+        }
+
+        $processedCount = 0;
+
+        foreach ($productIds as $productId) {
+            Log::info("[ProcessRelBaseWebhookAction] Sincronizando producto afectado por webhook: {$productId}");
+            
+            // Solicitar al servicio que traiga la "verdad absoluta" desde el API
+            $success = $this->relbaseService->syncProductById($productId);
+            
+            if ($success) {
+                $processedCount++;
+                Log::info("[ProcessRelBaseWebhookAction] Producto {$productId} sincronizado exitosamente.");
             }
-        } elseif (isset($data['imagenes']) && is_array($data['imagenes'])) {
-            $images = $data['imagenes'];
-        } elseif (isset($data['url_image']) && $data['url_image']) {
-            $images = [$data['url_image']];
         }
 
-        // Find product by SKU, or RelBase ID
-        $product = Product::where('sku', $sku)
-            ->orWhere('relbase_id', $relbaseId)
-            ->first();
-
-        if ($product) {
-            $product->update([
-                'relbase_id' => $relbaseId,
-                'name' => $name,
-                'description' => $description,
-                'price' => $price,
-                'stock' => $stock,
-                'image_url' => !empty($product->image_url) ? $product->image_url : $images,
-                'category_id' => $category->id,
-            ]);
-        } else {
-            $product = Product::create([
-                'relbase_id' => $relbaseId,
-                'sku' => $sku,
-                'name' => $name,
-                'slug' => Str::slug($name) . '-' . Str::random(4),
-                'description' => $description,
-                'price' => $price,
-                'stock' => $stock,
-                'image_url' => $images,
-                'category_id' => $category->id,
-                'is_featured' => false,
-            ]);
-        }
-
-        return $product;
+        return $processedCount;
     }
 }
+

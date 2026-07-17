@@ -212,32 +212,24 @@ class Products extends Component
     public function syncFromRelBase()
     {
         $this->isSyncing = true;
-        $this->syncStatusMessage = 'Sincronizando con RelBase...';
 
         try {
-            $service = app(RelBaseService::class);
-            $result = $service->syncCatalog();
+            // Lanzar el comando artisan directamente al sistema operativo en segundo plano
+            $command = 'php ' . base_path('artisan') . ' relbase:sync > /dev/null 2>&1 &';
+            exec($command);
 
-            if ($result['status'] === 'success') {
-                session()->flash('toast', [
-                    'type' => 'success',
-                    'message' => $result['message'],
-                ]);
-            } else {
-                session()->flash('toast', [
-                    'type' => 'error',
-                    'message' => $result['message'],
-                ]);
-            }
+            session()->flash('toast', [
+                'type' => 'success',
+                'message' => 'Sincronización masiva iniciada en segundo plano. Esto tomará varios minutos, puedes seguir usando el panel.',
+            ]);
         } catch (\Exception $e) {
             session()->flash('toast', [
                 'type' => 'error',
-                'message' => 'Excepción durante la sincronización: ' . $e->getMessage(),
+                'message' => 'Error al iniciar la sincronización: ' . $e->getMessage(),
             ]);
         }
 
         $this->isSyncing = false;
-        $this->syncStatusMessage = '';
     }
 
     /**
