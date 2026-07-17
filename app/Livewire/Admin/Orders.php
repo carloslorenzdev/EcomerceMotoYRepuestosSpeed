@@ -98,9 +98,12 @@ class Orders extends Component
     public function markAsShipped($orderId)
     {
         $order = Order::findOrFail($orderId);
+        
+        $autoTracking = 'MS-' . rand(10000, 99999) . '-' . $order->id;
+
         $order->update([
             'shipping_status' => 'enviado',
-            'shipping_tracking_number' => $this->shipping_tracking_number,
+            'shipping_tracking_number' => $autoTracking,
         ]);
 
         // Send email status update
@@ -113,11 +116,36 @@ class Orders extends Component
 
         if ($this->selectedOrderId == $orderId) {
             $this->shipping_status = 'enviado';
+            $this->shipping_tracking_number = $autoTracking;
         }
 
         session()->flash('toast', [
             'type' => 'success',
-            'message' => 'El pedido fue marcado como Enviado con seguimiento: ' . $this->shipping_tracking_number,
+            'message' => 'El pedido fue marcado como Enviado con seguimiento automático: ' . $autoTracking,
+        ]);
+    }
+
+    /**
+     * Delete an order.
+     */
+    public function deleteOrder($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+        
+        // El pedido puede tener items asociados, se borrarán si hay cascade delete,
+        // de lo contrario deberíamos borrar los items primero.
+        // Dado que usamos Eloquent, si no hay cascade en BD, los borramos a mano.
+        $order->items()->delete();
+        $order->delete();
+
+        if ($this->selectedOrderId == $orderId) {
+            $this->isDetailModalOpen = false;
+            $this->selectedOrderId = null;
+        }
+
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => 'El pedido fue eliminado correctamente.',
         ]);
     }
 

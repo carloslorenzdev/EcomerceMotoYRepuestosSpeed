@@ -16,7 +16,6 @@ class Home extends Component
     public function mount(): void
     {
         $this->featuredProducts = Product::where('is_featured', true)
-            ->orWhere('stock', '>', 0)
             ->take(8)
             ->get();
 

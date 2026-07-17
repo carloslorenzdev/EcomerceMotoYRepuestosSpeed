@@ -109,6 +109,26 @@
                         Inventario
                     </a>
 
+                    <!-- Users -->
+                    <a href="{{ route('admin.users') }}" 
+                       class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 {{ request()->routeIs('admin.users') ? 'bg-orange-600 text-white shadow-md shadow-orange-600/20' : 'text-neutral-455 hover:bg-white/5 hover:text-white' }}"
+                       @click="mobileMenuOpen = false">
+                        <svg class="size-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        Usuarios
+                    </a>
+
+                    <!-- Branding -->
+                    <a href="{{ route('admin.branding') }}" 
+                       class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 {{ request()->routeIs('admin.branding') ? 'bg-orange-600 text-white shadow-md shadow-orange-600/20' : 'text-neutral-455 hover:bg-white/5 hover:text-white' }}"
+                       @click="mobileMenuOpen = false">
+                        <svg class="size-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                        </svg>
+                        Marca (Branding)
+                    </a>
+
                     <!-- System -->
                     <a href="{{ route('admin.system') }}" 
                        class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 {{ request()->routeIs('admin.system') ? 'bg-orange-600 text-white shadow-md shadow-orange-600/20' : 'text-neutral-455 hover:bg-white/5 hover:text-white' }}"

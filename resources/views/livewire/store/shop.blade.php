@@ -17,7 +17,7 @@
         <!-- Category Filter -->
         <div class="bg-white border border-gray-150 rounded-2xl p-6 dark:bg-neutral-850 dark:border-neutral-800">
           <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Categorías</h3>
-          <div class="space-y-2">
+          <div class="space-y-2 max-h-[500px] overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-700 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-orange-500 transition-colors">
             <button type="button" 
                     wire:click="filterCategory('')" 
                     class="w-full flex items-center justify-between text-sm py-1.5 px-2 rounded-lg text-left {{ $categorySlug === '' ? 'bg-orange-50 text-orange-600 dark:bg-orange-950/20 dark:text-orange-400 font-semibold' : 'text-gray-600 hover:bg-gray-50 dark:text-neutral-400 dark:hover:bg-neutral-800' }}">

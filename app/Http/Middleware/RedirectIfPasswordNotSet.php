@@ -15,8 +15,8 @@ class RedirectIfPasswordNotSet
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && !auth()->user()->password_set) {
-            if (!$request->routeIs('password.set') && !$request->routeIs('logout') && !$request->routeIs('password.set.store')) {
+        if (auth()->check() && !auth()->user()->isAdmin() && !auth()->user()->password_set) {
+            if (!$request->routeIs('password.set') && !$request->routeIs('logout') && !$request->hasHeader('X-Livewire')) {
                 return redirect()->route('password.set');
             }
         }

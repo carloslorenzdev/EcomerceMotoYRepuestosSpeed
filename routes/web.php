@@ -11,6 +11,7 @@ use App\Livewire\Store\Services;
 Route::get('/', Home::class)->name('home');
 Route::get('tienda', Shop::class)->name('shop');
 Route::get('servicios', Services::class)->name('services');
+Route::get('sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
 
 // Google Authentication Routes
 Route::get('auth/google', [\App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle'])->name('auth.google');
