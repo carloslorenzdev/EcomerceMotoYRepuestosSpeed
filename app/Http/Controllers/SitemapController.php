@@ -11,7 +11,7 @@ class SitemapController extends Controller
 {
     public function index()
     {
-        $products = Product::where('status', 'active')->get();
+        $products = Product::all();
         $categories = Category::all();
 
         $content = '<?xml version="1.0" encoding="UTF-8"?>';
