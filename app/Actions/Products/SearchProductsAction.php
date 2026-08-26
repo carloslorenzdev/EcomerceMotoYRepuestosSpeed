@@ -25,11 +25,10 @@ class SearchProductsAction
 
         // Text search (SKU, Name, Description)
         if (!empty($filters['search'])) {
-            $search = '%' . $filters['search'] . '%';
+            $search = '%' . mb_strtolower($filters['search'], 'UTF-8') . '%';
             $query->where(function (Builder $q) use ($search) {
-                $q->where('name', 'like', $search)
-                  ->orWhere('sku', 'like', $search)
-                  ->orWhere('description', 'like', $search);
+                $q->whereRaw('LOWER(name) LIKE ?', [$search])
+                  ->orWhereRaw('LOWER(description) LIKE ?', [$search]);
             });
         }
 

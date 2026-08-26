@@ -120,13 +120,17 @@
             <div class="mt-4 flex-1 space-y-3.5 overflow-y-auto max-h-[160px] pr-2">
                 @forelse($recentLogs as $log)
                     <div class="flex items-start gap-3 text-xs border-b border-gray-100 dark:border-neutral-800 pb-3 last:border-b-0 last:pb-0">
+                        @php
+                            $isRelbase = \Illuminate\Support\Str::contains(strtolower($log->provider), 'relbase');
+                            $isSuccess = in_array($log->status, ['processed', 'success']);
+                        @endphp
                         <span class="inline-flex items-center justify-center size-7 rounded-lg font-bold shrink-0
-                            {{ $log->status === 'processed' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300' }}">
-                            {{ $log->provider === 'relbase' ? 'RB' : 'MP' }}
+                            {{ $isSuccess ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300' }}">
+                            {{ $isRelbase ? 'RB' : 'MP' }}
                         </span>
                         <div class="min-w-0 flex-1">
                             <p class="font-semibold text-gray-800 dark:text-neutral-200 truncate">
-                                {{ $log->provider === 'relbase' ? 'Sincronización RelBase' : 'Notificación de Pago' }}
+                                {{ $isRelbase ? 'Sincronización RelBase' : 'Notificación de Pago' }}
                             </p>
                             <p class="text-neutral-500 dark:text-neutral-400 text-[10px] mt-0.5">
                                 {{ $log->created_at->diffForHumans() }} • Estado: <span class="font-bold">{{ $log->status }}</span>

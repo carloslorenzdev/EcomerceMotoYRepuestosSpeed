@@ -10,6 +10,7 @@ use App\Livewire\Store\Services;
 // Public Storefront Routes
 Route::get('/', Home::class)->name('home');
 Route::get('tienda', Shop::class)->name('shop');
+Route::get('producto/{slug}', \App\Livewire\Store\ProductDetail::class)->name('product.detail');
 Route::get('servicios', Services::class)->name('services');
 Route::get('sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
 
@@ -25,6 +26,29 @@ Route::middleware(['auth'])->group(function () {
 // Webhook Routes (CSRF Excluded)
 Route::post('webhooks/relbase', RelBaseWebhookController::class)->name('webhooks.relbase');
 Route::post('webhooks/mercadopago', MercadoPagoWebhookController::class)->name('webhooks.mercadopago');
+
+// Temporary RelBase OAuth Callback (Mismo enlace que usaba el proyecto viejo)
+Route::get('api/relbase-webhook', function (\Illuminate\Http\Request $request) {
+    $code = $request->get('code');
+    if ($code) {
+        $response = \Illuminate\Support\Facades\Http::asForm()->post('https://api.relbase.cl/oauth/token', [
+            'grant_type' => 'authorization_code',
+            'client_id' => env('RELBASE_CLIENT_ID'),
+            'client_secret' => env('RELBASE_CLIENT_SECRET'),
+            'redirect_uri' => 'https://www.motosspeed.cl/api/relbase-webhook',
+            'code' => $code,
+        ]);
+        
+        $data = $response->json();
+        if (isset($data['refresh_token'])) {
+            return "<h2>¡Autorización Exitosa de RelBase!</h2>
+                    <p>Copia y pega la siguiente línea en tu archivo <b>.env</b> local y en tu servidor VPS:</p>
+                    <div style='padding:20px;background:#eee;font-family:monospace;font-size:16px;'>RELBASE_REFRESH_TOKEN=\"{$data['refresh_token']}\"</div>";
+        }
+        return "Error obteniendo token: " . $response->body();
+    }
+    return "Listo para recibir el código de autorización de Relbase.";
+});
 
 Route::middleware(['auth', 'verified'])->get('dashboard', function () {
     if (auth()->user()->isAdmin()) {

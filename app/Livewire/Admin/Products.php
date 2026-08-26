@@ -9,9 +9,11 @@ use App\Models\Category;
 use App\Services\RelBaseService;
 use Illuminate\Support\Str;
 
+use Livewire\WithFileUploads;
+
 class Products extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
 
     public $search = '';
     public $categoryFilter = '';
@@ -130,23 +132,27 @@ class Products extends Component
         $this->isEditModalOpen = true;
     }
 
-    /**
-     * Add image URL helper.
-     */
-    public function addImageUrl()
-    {
-        $this->validate([
-            'newImageUrl' => 'required|url',
-        ], [
-            'newImageUrl.url' => 'Debe ser una URL válida.',
-            'newImageUrl.required' => 'La URL no puede estar vacía.',
-        ]);
+    public $newImage;
 
-        if (!in_array($this->newImageUrl, $this->image_urls)) {
-            $this->image_urls[] = $this->newImageUrl;
+    /**
+     * Upload and add image.
+     */
+    public function addImage()
+    {
+        // Sin validaciones estrictas. Si hay archivo, forzamos el guardado.
+        if (!$this->newImage) {
+            $this->addError('newImage', 'Debes seleccionar un archivo.');
+            return;
         }
 
-        $this->newImageUrl = '';
+        try {
+            $path = $this->newImage->store('products', 'public');
+            $url = asset('storage/' . $path);
+            $this->image_urls[] = $url;
+            $this->newImage = null;
+        } catch (\Exception $e) {
+            $this->addError('newImage', 'El servidor rechazó el archivo. Es posible que sea demasiado pesado o esté corrupto.');
+        }
     }
 
     /**
@@ -193,10 +199,9 @@ class Products extends Component
             'image_url' => $this->image_urls,
         ]);
 
-        // Sync stock back to RelBase if configured
-        if ($product->relbase_id) {
-            app(RelBaseService::class)->updateProductStock($product->relbase_id, $this->stock);
-        }
+        // Se eliminó la sincronización hacia RelBase desde el panel de administración.
+        // RelBase es la fuente de verdad (Source of Truth) para inventario y precios.
+        // Las imágenes y datos guardados aquí son estrictamente locales.
 
         $this->isEditModalOpen = false;
 

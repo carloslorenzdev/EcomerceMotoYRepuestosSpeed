@@ -20,6 +20,14 @@ class RelBaseWebhookController extends Controller
         $signature = $request->header('X-Relke-Signature') ?? $request->header('x-relke-signature');
         $secret = env('RELBASE_WEBHOOK_SECRET');
 
+        $payload = json_decode($rawPayload, true) ?? ['event_header' => $event, 'raw' => $rawPayload];
+
+        $webhookLog = \App\Models\WebhookLog::create([
+            'provider' => 'RelBase (' . ($event ?? 'unknown') . ')',
+            'payload' => $payload,
+            'status' => 'processing',
+        ]);
+
         Log::info('[RelBase Webhook] Event Received', ['event' => $event]);
 
         // 1. Validar Firma Criptográfica (HMAC SHA256)
@@ -30,6 +38,7 @@ class RelBaseWebhookController extends Controller
                     'calculado' => $expectedHash,
                     'recibido' => str_replace('sha256=', '', $signature)
                 ]);
+                $webhookLog->update(['status' => 'failed', 'error' => 'Firma de seguridad inválida']);
             } else {
                 Log::info('[RelBase Webhook] Firma verificada correctamente.');
             }
@@ -37,17 +46,24 @@ class RelBaseWebhookController extends Controller
 
         // 2. Respuesta a Evento de Prueba de RelBase
         if ($event === 'webhook.test') {
+            $webhookLog->update(['status' => 'success', 'error' => 'Evento de prueba (Ping) recibido correctamente.']);
             return response()->json(['success' => true, 'message' => 'Test event received']);
         }
 
-        $payload = json_decode($rawPayload, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
+        if (json_last_error() !== JSON_ERROR_NONE && empty($payload['event_header'])) {
+            $webhookLog->update(['status' => 'failed', 'error' => 'Formato JSON inválido.']);
             return response()->json(['success' => false, 'message' => 'Invalid JSON'], 400);
         }
 
         // 3. Ejecutar Acción Principal
         try {
             $processedCount = $action->execute($payload, $event);
+
+            $mensajeExito = $processedCount > 0 
+                ? "Sincronización o actualización completada ($processedCount registros)."
+                : "Aviso recibido pero ignorado (sin productos afectados).";
+
+            $webhookLog->update(['status' => 'success', 'error' => $mensajeExito]);
 
             return response()->json([
                 'success' => true,
@@ -57,6 +73,7 @@ class RelBaseWebhookController extends Controller
 
         } catch (\Exception $e) {
             Log::error('[RelBase Webhook] Error: ' . $e->getMessage());
+            $webhookLog->update(['status' => 'failed', 'error' => 'Error interno: ' . $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Internal server error processing webhook',

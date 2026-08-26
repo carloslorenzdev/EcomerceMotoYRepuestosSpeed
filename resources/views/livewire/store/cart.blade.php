@@ -83,14 +83,20 @@
                             </div>
                             <div class="flex flex-1 items-end justify-between text-sm">
                               <!-- Quantity selectors -->
-                              <div class="flex items-center border border-gray-200 dark:border-neutral-700 rounded-md">
-                                <button type="button" wire:click="decrementQuantity({{ $productId }})" class="p-1 px-2 text-gray-500 hover:text-orange-600 dark:text-neutral-400 dark:hover:text-orange-500">-</button>
-                                <span class="px-2 text-xs font-semibold dark:text-white">{{ $item['quantity'] }}</span>
-                                <button type="button" wire:click="incrementQuantity({{ $productId }})" class="p-1 px-2 text-gray-500 hover:text-orange-600 dark:text-neutral-400 dark:hover:text-orange-500">+</button>
+                              <div class="flex items-center border border-gray-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
+                                <button type="button" wire:click="decrementQuantity({{ $productId }})" class="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-neutral-800 dark:text-neutral-400 dark:hover:text-orange-500 transition-colors">
+                                  <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" /></svg>
+                                </button>
+                                <span class="px-3 text-xs font-bold text-gray-800 dark:text-white w-8 text-center">{{ $item['quantity'] }}</span>
+                                <button type="button" wire:click="incrementQuantity({{ $productId }})" class="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-neutral-800 dark:text-neutral-400 dark:hover:text-orange-500 transition-colors">
+                                  <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                                </button>
                               </div>
 
                               <div class="flex">
-                                <button type="button" wire:click="removeItem({{ $productId }})" class="font-medium text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300">Quitar</button>
+                                <button type="button" wire:click="removeItem({{ $productId }})" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/30" title="Eliminar del carrito">
+                                  <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -119,7 +125,54 @@
                       </div>
                       <div>
                         <label class="block text-xs font-bold text-gray-700 dark:text-neutral-300 uppercase mb-1">Teléfono</label>
-                        <input type="text" wire:model="customer_phone" class="w-full text-sm rounded-lg border-gray-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 p-2.5 focus:border-orange-500 focus:ring-orange-500" placeholder="+56912345678">
+                        <div class="flex shadow-sm rounded-lg">
+                            <div x-data="{
+                                open: false,
+                                value: @entangle('customer_phone_code'),
+                                countries: [
+                                    { code: '+56', iso: 'cl', name: 'Chile' },
+                                    { code: '+54', iso: 'ar', name: 'Argentina' },
+                                    { code: '+591', iso: 'bo', name: 'Bolivia' },
+                                    { code: '+55', iso: 'br', name: 'Brasil' },
+                                    { code: '+57', iso: 'co', name: 'Colombia' },
+                                    { code: '+593', iso: 'ec', name: 'Ecuador' },
+                                    { code: '+34', iso: 'es', name: 'España' },
+                                    { code: '+1', iso: 'us', name: 'EE.UU.' },
+                                    { code: '+52', iso: 'mx', name: 'México' },
+                                    { code: '+51', iso: 'pe', name: 'Perú' },
+                                    { code: '+595', iso: 'py', name: 'Paraguay' },
+                                    { code: '+598', iso: 'uy', name: 'Uruguay' },
+                                    { code: '+58', iso: 've', name: 'Venezuela' }
+                                ],
+                                get selectedCountry() {
+                                    return this.countries.find(c => c.code === this.value) || this.countries[0];
+                                }
+                            }" class="relative w-[40%] sm:w-[35%]">
+                                <!-- Trigger Button -->
+                                <button type="button" @click="open = !open" @click.away="open = false" 
+                                    class="w-full h-full min-h-[44px] flex items-center justify-between text-xs sm:text-sm rounded-l-lg border border-gray-200 border-r-0 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 px-3 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 bg-gray-50 dark:bg-neutral-900 focus:z-10 transition-colors">
+                                    <div class="flex items-center gap-2">
+                                        <img :src="`https://flagcdn.com/w20/${selectedCountry.iso}.png`" :alt="selectedCountry.name" class="w-5 h-auto shadow-sm rounded-sm">
+                                        <span x-text="selectedCountry.code" class="font-medium text-gray-700 dark:text-gray-200"></span>
+                                    </div>
+                                    <svg class="size-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                </button>
+                                
+                                <!-- Dropdown Menu -->
+                                <div x-show="open" x-transition.opacity
+                                    class="absolute z-50 mt-1 w-56 bg-white dark:bg-neutral-800 shadow-xl rounded-lg border border-gray-100 dark:border-neutral-700 max-h-56 overflow-y-auto" style="display: none;">
+                                    <template x-for="country in countries" :key="country.iso">
+                                        <button type="button" @click="value = country.code; open = false" 
+                                            class="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-orange-50 dark:hover:bg-neutral-700 transition-colors border-b border-gray-50 dark:border-neutral-750 last:border-b-0"
+                                            :class="{'bg-orange-50 dark:bg-neutral-700 font-bold': value === country.code}">
+                                            <img :src="`https://flagcdn.com/w20/${country.iso}.png`" :alt="country.name" class="w-5 h-auto shadow-sm rounded-sm">
+                                            <span class="text-gray-900 dark:text-neutral-200" x-text="`${country.name} (${country.code})`"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                            <input type="tel" wire:model="customer_phone_number" class="w-[60%] sm:w-[65%] text-sm rounded-r-lg border-gray-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 p-2.5 focus:border-orange-500 focus:ring-orange-500 focus:z-10" placeholder="912345678">
+                        </div>
                         @error('customer_phone') <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span> @enderror
                       </div>
                     </div>
@@ -210,12 +263,13 @@
                   Envío coordinado posterior a la compra. Los pagos se procesan con Mercado Pago de forma segura.
                 </p>
                 <div>
-                  <button type="button" wire:click="checkout" wire:loading.attr="disabled" class="w-full flex items-center justify-center gap-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white p-3.5 font-bold shadow-md transition-colors duration-150 disabled:opacity-50">
-                    <svg wire:loading class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                  <button type="button" wire:click="checkout" wire:loading.attr="disabled" wire:target="checkout" class="w-full flex items-center justify-center gap-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white p-3.5 font-bold shadow-md transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg wire:loading wire:target="checkout" class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Pagar con Mercado Pago
+                    <span wire:loading.remove wire:target="checkout">Ir a Pagar</span>
+                    <span wire:loading wire:target="checkout">Procesando de forma segura...</span>
                   </button>
                 </div>
                 <div class="mt-6 flex justify-center text-center text-xs text-gray-500">
