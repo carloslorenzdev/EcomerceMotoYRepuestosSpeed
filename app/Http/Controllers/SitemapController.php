@@ -43,7 +43,9 @@ class SitemapController extends Controller
         foreach ($products as $product) {
             $content .= '<url>';
             $content .= '<loc>' . route('product.detail', $product->slug) . '</loc>';
-            $content .= '<lastmod>' . $product->updated_at->tz('UTC')->toAtomString() . '</lastmod>';
+            if ($product->updated_at) {
+                $content .= '<lastmod>' . $product->updated_at->tz('UTC')->toAtomString() . '</lastmod>';
+            }
             $content .= '<changefreq>weekly</changefreq>';
             $content .= '<priority>0.7</priority>';
             $content .= '</url>';
