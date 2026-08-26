@@ -63,7 +63,10 @@ class CreateMercadoPagoPreferenceAction
         ];
 
         try {
+            $idempotencyKey = 'mp_pref_order_' . $order->id;
+            
             $response = Http::withToken($accessToken)
+                ->withHeader('X-Idempotency-Key', $idempotencyKey)
                 ->post('https://api.mercadopago.com/checkout/preferences', $payload);
 
             if ($response->successful()) {

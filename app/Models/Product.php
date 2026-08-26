@@ -34,6 +34,33 @@ class Product extends Model
     ];
 
     /**
+     * Accessor to guarantee valid and secure image URLs.
+     */
+    protected function imageUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: function ($value) {
+                if (!$value) return [];
+                
+                $images = is_string($value) ? json_decode($value, true) : $value;
+                if (!is_array($images)) return [];
+                
+                return array_map(function ($url) {
+                    // Si es una ruta relativa (ej: /products/foto.jpg), le agregamos el dominio completo
+                    if (str_starts_with($url, '/')) {
+                        return asset($url); 
+                    }
+                    // Si la imagen viene por HTTP inseguro, la forzamos a HTTPS para evitar bloqueos en celulares
+                    if (str_starts_with($url, 'http://') && env('APP_ENV') === 'production') {
+                        return str_replace('http://', 'https://', $url);
+                    }
+                    return $url;
+                }, $images);
+            }
+        );
+    }
+
+    /**
      * Category relationship.
      */
     public function category(): BelongsTo

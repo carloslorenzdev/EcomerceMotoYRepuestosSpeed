@@ -58,6 +58,21 @@ class RelBaseService
         return null;
     }
 
+    private function downloadRelbaseImage(string $url, string $sku): string
+    {
+        try {
+            $contents = Http::timeout(10)->get($url)->body();
+            if (empty($contents)) return $url;
+            
+            $filename = 'products/rb_' . $sku . '_' . md5($url) . '.jpg';
+            \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $contents);
+            return asset('storage/' . $filename);
+        } catch (\Exception $e) {
+            Log::error("[RelBaseService] Error downloading image for SKU {$sku}: " . $e->getMessage());
+            return $url;
+        }
+    }
+
     /**
      * Download and sync the entire product catalog from RelBase.
      */
@@ -124,14 +139,11 @@ class RelBaseService
                 }
             }
 
-            if ($stock <= 0) continue; // Ignorar productos sin stock
-
             $nameLower = strtolower($p['name']);
-            if (str_contains($nameLower, 'servicio') || $nameLower === 'abono' || $nameLower === 'repuestos') {
-                continue; // Ignorar servicios o items genéricos
+            if (str_contains($nameLower, 'servicio') || $nameLower === 'abono') {
+                continue; 
             }
 
-            // Resolve category
             $categoryName = $p['category']['name'] ?? 'Sin Categoría';
             $categorySlug = Str::slug($categoryName);
             $category = Category::firstOrCreate(
@@ -139,27 +151,15 @@ class RelBaseService
                 ['name' => $categoryName, 'description' => "Categoría importada: {$categoryName}"]
             );
 
-            // Compute prices
             $price = $p['is_tax_affected'] ? round(($p['price'] ?? 0) * 1.19) : round($p['price'] ?? 0);
             $comparePrice = !empty($p['price_sale']) ? ($p['is_tax_affected'] ? round($p['price_sale'] * 1.19) : round($p['price_sale'])) : null;
-
-            // Resolve images
-            $images = [];
-            $relbaseImageUrl = $p['url_image'] ?? ($p['image']['url'] ?? null);
-            if ($relbaseImageUrl) {
-                $images[] = $relbaseImageUrl;
-            }
 
             $sku = $p['code'] ?? null;
             if (!$sku) continue;
 
-            // Find product by SKU or RelBase ID
-            $localProduct = Product::where('sku', $sku)
-                ->orWhere('relbase_id', $p['id'])
-                ->first();
+            $localProduct = Product::where('sku', $sku)->orWhere('relbase_id', $p['id'])->first();
 
             $slug = Str::slug($p['name']);
-            // Ensure unique slug
             $originalSlug = $slug;
             $counter = 1;
             while (Product::where('slug', $slug)->where('sku', '!=', $sku)->exists()) {
@@ -167,10 +167,29 @@ class RelBaseService
                 $counter++;
             }
 
+            // Evaluar si debemos conservar la imagen local o descargar una nueva
+            $preserveImage = false;
+            if ($localProduct && !empty($localProduct->image_url)) {
+                $firstImage = $localProduct->image_url[0] ?? '';
+                // Si la imagen guardada es un enlace temporal de Amazon S3, está rota, NO la conserves.
+                if (!str_contains($firstImage, 'X-Amz-Expires') && !str_contains($firstImage, 'amazonaws.com')) {
+                    $preserveImage = true;
+                }
+            }
+
+            $images = [];
+            if ($preserveImage) {
+                $images = $localProduct->image_url;
+            } else {
+                $relbaseImageUrl = $p['url_image'] ?? ($p['image']['url'] ?? null);
+                if ($relbaseImageUrl) {
+                    // Descargar físicamente la imagen al servidor
+                    $downloadedUrl = $this->downloadRelbaseImage($relbaseImageUrl, $sku);
+                    $images[] = $downloadedUrl;
+                }
+            }
+
             if ($localProduct) {
-                // If local product has images that aren't empty, preserve them
-                $preserveImage = !empty($localProduct->image_url);
-                
                 $localProduct->update([
                     'relbase_id' => $p['id'],
                     'name' => $p['name'],
@@ -178,7 +197,7 @@ class RelBaseService
                     'price' => $price,
                     'compare_at_price' => $comparePrice,
                     'stock' => max(0, (int)$stock),
-                    'image_url' => $preserveImage ? $localProduct->image_url : $images,
+                    'image_url' => $images,
                     'category_id' => $category->id,
                 ]);
             } else {
@@ -337,23 +356,9 @@ class RelBaseService
             $p = $data['data'] ?? null;
             if (!$p || empty($p['inventories'])) return false;
 
-            // Prepare payload updating stock in the primary inventory location
-            $payload = [
-                'name' => $p['name'],
-                'description' => $p['description'] ?? '',
-                'code' => $p['code'] ?? '',
-                'price' => $p['price'],
-                'currency' => 1, // CLP
-                'product_type' => 1, // Physical product
-                'category_id' => $p['category']['id'] ?? 1,
-                'is_tax' => $p['is_tax_affected'] ? 1 : 0,
-                'inventories' => [
-                    [
-                        'ware_house_id' => $p['inventories'][0]['ware_house_id'],
-                        'stock' => $newStock
-                    ]
-                ]
-            ];
+            // Prepare payload updating stock in the primary inventory location, preserving ALL original data
+            $payload = $p;
+            $payload['inventories'][0]['stock'] = $newStock;
 
             // Send PUT update
             $putResponse = Http::withHeaders([

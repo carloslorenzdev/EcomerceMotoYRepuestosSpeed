@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             \App\Http\Middleware\RedirectIfPasswordNotSet::class,
+            \App\Http\Middleware\CheckSessionSecurity::class,
         ]);
 
         $middleware->alias([

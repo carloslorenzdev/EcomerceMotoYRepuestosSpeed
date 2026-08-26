@@ -202,22 +202,22 @@
                     
                     <!-- Row 1: Name -->
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nombre del Producto</label>
-                        <input type="text" wire:model="name" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-800 dark:border-neutral-750 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-orange-500">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nombre del Producto <span class="text-[9px] text-orange-500 normal-case ml-2">(Bloqueado por RelBase)</span></label>
+                        <input type="text" wire:model="name" disabled class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-100 text-gray-500 dark:border-neutral-750 dark:bg-neutral-800/80 dark:text-neutral-500 cursor-not-allowed focus:outline-none">
                         @error('name') <span class="text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Row 2: SKU & Category -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">SKU / Código</label>
-                            <input type="text" wire:model="sku" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-800 dark:border-neutral-750 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-orange-500">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">SKU / Código <span class="text-[9px] text-orange-500 normal-case ml-1">(RelBase)</span></label>
+                            <input type="text" wire:model="sku" disabled class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-100 text-gray-500 dark:border-neutral-750 dark:bg-neutral-800/80 dark:text-neutral-500 cursor-not-allowed focus:outline-none">
                             @error('sku') <span class="text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Categoría</label>
-                            <select wire:model="category_id" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-800 dark:border-neutral-750 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-orange-500">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Categoría <span class="text-[9px] text-orange-500 normal-case ml-1">(RelBase)</span></label>
+                            <select wire:model="category_id" disabled class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-100 text-gray-500 dark:border-neutral-750 dark:bg-neutral-800/80 dark:text-neutral-500 cursor-not-allowed focus:outline-none appearance-none">
                                 <option value="">Seleccione...</option>
                                 @foreach($categories as $cat)
                                     <option value="{{ $cat->id }}">{{ $cat->name }}</option>
@@ -230,20 +230,20 @@
                     <!-- Row 3: Price & Offer Price -->
                     <div class="grid grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Precio ($)</label>
-                            <input type="number" wire:model="price" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-800 dark:border-neutral-750 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-orange-500">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Precio ($) <span class="text-[9px] text-orange-500 normal-case ml-1">(RelBase)</span></label>
+                            <input type="number" wire:model="price" disabled class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-100 text-gray-500 dark:border-neutral-750 dark:bg-neutral-800/80 dark:text-neutral-500 cursor-not-allowed focus:outline-none">
                             @error('price') <span class="text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Precio Oferta ($)</label>
-                            <input type="number" wire:model="compare_at_price" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-800 dark:border-neutral-750 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-orange-500">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Oferta ($) <span class="text-[9px] text-orange-500 normal-case ml-1">(RelBase)</span></label>
+                            <input type="number" wire:model="compare_at_price" disabled class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-100 text-gray-500 dark:border-neutral-750 dark:bg-neutral-800/80 dark:text-neutral-500 cursor-not-allowed focus:outline-none">
                             @error('compare_at_price') <span class="text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Stock</label>
-                            <input type="number" wire:model="stock" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-800 dark:border-neutral-750 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-orange-500">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Stock <span class="text-[9px] text-orange-500 normal-case ml-1">(RelBase)</span></label>
+                            <input type="number" wire:model="stock" disabled class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-100 text-gray-500 font-bold dark:border-neutral-750 dark:bg-neutral-800/80 dark:text-neutral-500 cursor-not-allowed focus:outline-none">
                             @error('stock') <span class="text-xs text-red-500 font-semibold">{{ $message }}</span> @enderror
                         </div>
                     </div>
@@ -263,13 +263,28 @@
                         @if(!empty($image_urls))
                             <div class="grid grid-cols-4 gap-2 mb-3">
                                 @foreach($image_urls as $index => $url)
+                                    @php
+                                        // Detect if image is from RelBase
+                                        $isRelBase = $index === 0 || 
+                                                     \Illuminate\Support\Str::contains($url, 'rb_') || 
+                                                     \Illuminate\Support\Str::contains($url, 'amazonaws.com') ||
+                                                     \Illuminate\Support\Str::contains($url, 'relbase');
+                                    @endphp
                                     <div class="relative group h-16 rounded-xl overflow-hidden border border-gray-150 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900">
                                         <img src="{{ $url }}" class="h-full w-full object-cover">
-                                        <button type="button" wire:click="removeImageUrl({{ $index }})" class="absolute top-1 right-1 p-1 rounded-full bg-red-600 text-white opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 transition-all shadow-xs">
-                                            <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
+                                        @if(!$isRelBase)
+                                            <button type="button" wire:click="removeImageUrl({{ $index }})" class="absolute top-1 right-1 p-1 rounded-full bg-red-600 text-white opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 transition-all shadow-xs">
+                                                <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        @else
+                                            <div class="absolute top-1 right-1 p-1 rounded-full bg-gray-800/70 text-white" title="Imagen protegida por RelBase">
+                                                <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                </svg>
+                                            </div>
+                                        @endif
                                     </div>
                                 @endforeach
                             </div>
@@ -277,14 +292,17 @@
                             <p class="text-xs text-gray-400 mb-3">Este producto no tiene imágenes registradas.</p>
                         @endif
 
-                        <!-- Add new image URL -->
-                        <div class="flex gap-2">
-                            <input type="text" wire:model="newImageUrl" placeholder="https://ejemplo.com/imagen.jpg" class="flex-1 px-3.5 py-2.5 text-xs rounded-xl border border-gray-200 bg-white text-gray-800 dark:border-neutral-750 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-orange-500">
-                            <button type="button" wire:click="addImageUrl" class="px-4 py-2.5 text-xs font-bold bg-neutral-900 dark:bg-neutral-850 hover:bg-orange-600 text-white rounded-xl transition">
-                                Añadir
+                        <!-- Add new image file -->
+                        <div class="flex gap-2 items-center">
+                            <input type="file" wire:model="newImage" accept="image/*" class="flex-1 px-3.5 py-2 text-xs rounded-xl border border-gray-200 bg-white text-gray-800 dark:border-neutral-750 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-orange-500 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 dark:file:bg-neutral-800 dark:file:text-orange-400">
+                            
+                            <div wire:loading wire:target="newImage" class="text-xs text-orange-500 mr-2 font-bold animate-pulse">Cargando...</div>
+                            
+                            <button type="button" wire:click="addImage" class="px-4 py-2 text-xs font-bold bg-neutral-900 dark:bg-neutral-850 hover:bg-orange-600 text-white rounded-xl transition">
+                                Subir
                             </button>
                         </div>
-                        @error('newImageUrl') <span class="text-xs text-red-500 font-semibold block mt-1">{{ $message }}</span> @enderror
+                        @error('newImage') <span class="text-xs text-red-500 font-semibold block mt-1">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Row 5: Featured & Visibility flags -->

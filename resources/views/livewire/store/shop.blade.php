@@ -64,7 +64,7 @@
           <div class="relative w-full sm:max-w-xs">
             <input type="text" 
                    wire:model.live.debounce.300ms="search" 
-                   placeholder="Buscar por SKU, nombre..." 
+                   placeholder="Buscar repuesto o accesorio..." 
                    class="w-full text-sm rounded-lg border-gray-200 pl-10 pr-4 py-2.5 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 focus:border-orange-500 focus:ring-orange-500">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
               <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -134,11 +134,15 @@
                   <!-- Image Wrapper -->
                   <div class="aspect-square bg-gray-50 dark:bg-neutral-800 flex items-center justify-center relative overflow-hidden">
                     @if (!empty($product->image_url))
-                      <img src="{{ $product->image_url[0] }}" alt="{{ $product->name }}" class="object-cover size-full group-hover:scale-105 transition-transform duration-300">
+                      <a href="{{ route('product.detail', $product->slug) }}" class="contents">
+                        <img src="{{ $product->image_url[0] }}" alt="{{ $product->name }}" class="object-cover size-full group-hover:scale-105 transition-transform duration-300">
+                      </a>
                     @else
-                      <svg class="size-12 text-gray-300 dark:text-neutral-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                      </svg>
+                      <a href="{{ route('product.detail', $product->slug) }}" class="contents">
+                        <svg class="size-12 text-gray-300 dark:text-neutral-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                      </a>
                     @endif
 
                     @if ($product->stock <= 0)
@@ -151,9 +155,9 @@
                     <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1">
                       {{ $product->category ? $product->category->name : 'General' }}
                     </span>
-                    <h3 class="text-sm font-bold text-gray-800 dark:text-white group-hover:text-orange-600 transition-colors line-clamp-2 pr-1 mb-2">
+                    <a href="{{ route('product.detail', $product->slug) }}" class="text-sm font-bold text-gray-800 dark:text-white group-hover:text-orange-600 transition-colors line-clamp-2 pr-1 mb-2">
                       {{ $product->name }}
-                    </h3>
+                    </a>
                     
                     <div class="flex items-baseline gap-2 mb-4 mt-auto">
                       <span class="text-lg font-extrabold font-title text-orange-600 dark:text-orange-500">${{ number_format($product->price, 0, ',', '.') }}</span>
@@ -166,11 +170,18 @@
                     <button type="button" 
                             wire:click="$dispatch('addToCart', { productId: {{ $product->id }} })" 
                             @if ($product->stock <= 0) disabled @endif
-                            class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 dark:bg-neutral-800 hover:bg-orange-600 dark:hover:bg-orange-600 text-white p-2.5 text-xs font-bold transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none">
-                      <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                      </svg>
-                      Agregar al carro
+                            class="w-full inline-flex items-center justify-center gap-2 rounded-lg p-2.5 text-xs font-bold transition-all duration-150 {{ $product->stock <= 0 ? 'bg-gray-200 text-gray-500 dark:bg-neutral-800 dark:text-neutral-500 cursor-not-allowed' : 'bg-neutral-900 text-white hover:bg-orange-600 dark:bg-neutral-800 dark:hover:bg-orange-600' }}">
+                      @if ($product->stock <= 0)
+                        <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                        </svg>
+                        No disponible
+                      @else
+                        <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        </svg>
+                        Agregar al carro
+                      @endif
                     </button>
                   </div>
                 </div>

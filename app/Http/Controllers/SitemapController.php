@@ -2,48 +2,56 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Product;
 use App\Models\Category;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class SitemapController extends Controller
 {
     public function index()
     {
+        $products = Product::where('status', 'active')->get();
         $categories = Category::all();
-        $baseUrl = config('app.url');
 
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
-        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        $content = '<?xml version="1.0" encoding="UTF-8"?>';
+        $content .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
-        // Main pages
-        $pages = [
-            '/',
-            '/tienda',
-            '/servicios'
-        ];
+        // Home
+        $content .= '<url>';
+        $content .= '<loc>' . route('home') . '</loc>';
+        $content .= '<changefreq>daily</changefreq>';
+        $content .= '<priority>1.0</priority>';
+        $content .= '</url>';
 
-        foreach ($pages as $page) {
-            $xml .= '<url>';
-            $xml .= '<loc>' . rtrim($baseUrl, '/') . $page . '</loc>';
-            $xml .= '<lastmod>' . now()->toAtomString() . '</lastmod>';
-            $xml .= '<changefreq>weekly</changefreq>';
-            $xml .= '<priority>' . ($page == '/' ? '1.0' : '0.8') . '</priority>';
-            $xml .= '</url>';
-        }
+        // Shop / Categories
+        $content .= '<url>';
+        $content .= '<loc>' . route('shop') . '</loc>';
+        $content .= '<changefreq>daily</changefreq>';
+        $content .= '<priority>0.9</priority>';
+        $content .= '</url>';
 
-        // Category pages
         foreach ($categories as $category) {
-            $xml .= '<url>';
-            $xml .= '<loc>' . rtrim($baseUrl, '/') . '/tienda?categorySlug=' . $category->slug . '</loc>';
-            $xml .= '<lastmod>' . $category->updated_at->toAtomString() . '</lastmod>';
-            $xml .= '<changefreq>daily</changefreq>';
-            $xml .= '<priority>0.7</priority>';
-            $xml .= '</url>';
+            $content .= '<url>';
+            $content .= '<loc>' . route('shop', ['category' => $category->slug]) . '</loc>';
+            $content .= '<changefreq>weekly</changefreq>';
+            $content .= '<priority>0.8</priority>';
+            $content .= '</url>';
         }
 
-        $xml .= '</urlset>';
+        // Products
+        foreach ($products as $product) {
+            $content .= '<url>';
+            $content .= '<loc>' . route('product.detail', $product->slug) . '</loc>';
+            $content .= '<lastmod>' . $product->updated_at->tz('UTC')->toAtomString() . '</lastmod>';
+            $content .= '<changefreq>weekly</changefreq>';
+            $content .= '<priority>0.7</priority>';
+            $content .= '</url>';
+        }
 
-        return response($xml, 200)
+        $content .= '</urlset>';
+
+        return response($content, 200)
             ->header('Content-Type', 'text/xml');
     }
 }

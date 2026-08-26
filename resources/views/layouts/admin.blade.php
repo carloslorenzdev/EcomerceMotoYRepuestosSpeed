@@ -253,6 +253,94 @@
             </div>
         </div>
 
+        @if(!session()->has('payment_reminder_shown') && Auth::check())
+            @php session()->put('payment_reminder_shown', true); @endphp
+            <!-- Payment Reminder Modal -->
+            <div x-data="{ showReminder: true }" 
+                 x-show="showReminder" 
+                 class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center" 
+                 aria-labelledby="modal-title" role="dialog" aria-modal="true"
+                 style="display: none;">
+                 
+                <!-- Background overlay -->
+                <div class="fixed inset-0 transition-opacity" 
+                     style="background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px);"
+                     x-show="showReminder"
+                     x-transition:enter="ease-out duration-300"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     x-transition:leave="ease-in duration-200"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0"></div>
+
+                <div class="relative w-full max-w-md p-4 flex justify-center z-10">
+                    <!-- Modal panel -->
+                    <div class="relative w-full transform overflow-visible rounded-3xl bg-white shadow-2xl transition-all"
+                         x-show="showReminder"
+                         x-transition:enter="ease-out duration-300"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="ease-in duration-200"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         @click.away="showReminder = false">
+                        
+                        <!-- Floating Close Button -->
+                        <button type="button" @click="showReminder = false" 
+                                class="absolute -top-3 -right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-gray-500 shadow-md hover:text-gray-800 focus:outline-hidden z-20 transition-transform hover:scale-110" style="border: 1px solid #e5e7eb;">
+                            <svg class="h-4 w-4" style="stroke-width: 2px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <!-- Content Body -->
+                        <div class="px-8 py-10 text-center">
+                            
+                            <!-- CrlDev Logo HTML Recreation -->
+                            <div class="flex items-center justify-center gap-3 mb-8">
+                                <div class="font-black text-5xl tracking-tighter" style="font-family: monospace; color: #111827;">&lt;<span>/</span>&gt;</div>
+                                <div class="flex flex-col text-left">
+                                    <span class="font-black text-4xl leading-none tracking-tight" style="color: #111827;">CrlDev</span>
+                                    <span class="font-bold text-[9px] tracking-[0.2em] mt-1" style="color: #111827;">SOFTWARE DEVELOPMENT</span>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-bold mb-4" id="modal-title" style="color: #111827;">
+                                Aviso de Servicio
+                            </h3>
+
+                            <div class="space-y-5 text-sm leading-relaxed" style="color: #4b5563;">
+                                <p>
+                                    Esperamos que esté disfrutando de su tienda en línea y que las integraciones funcionen a la perfección para su negocio.
+                                </p>
+                                
+                                <div class="rounded-xl p-4" style="background-color: #f9fafb; border: 1px solid #f3f4f6;">
+                                    <p class="font-semibold" style="color: #111827;">
+                                        Este eCommerce se encuentra en un periodo de disponibilidad condicional y estará activo hasta el <span class="font-black text-base" style="color: #ea580c;">31 de agosto</span>.
+                                    </p>
+                                </div>
+                                
+                                <p>
+                                    Para evitar la suspensión del servicio y la eliminación de los archivos en el servidor VPS, le solicitamos regularizar el pago antes de la fecha mencionada.
+                                </p>
+                                
+                                <p class="text-xs italic mt-6" style="color: #9ca3af;">
+                                    Para realizar el pago y evitar la eliminación del servicio, comuníquese con el desarrollador.
+                                </p>
+                            </div>
+                            
+                            <!-- Action Button -->
+                            <div class="mt-8">
+                                <button type="button" @click="showReminder = false" class="w-full rounded-xl px-4 py-3.5 text-sm font-bold shadow-lg transition-all hover:-translate-y-0.5" style="background-color: #111827; color: white;">
+                                    Entendido
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         @persist('toast')
             <flux:toast.group>
                 <flux:toast />

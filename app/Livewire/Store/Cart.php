@@ -22,6 +22,8 @@ class Cart extends Component
     public string $customer_name = '';
     public string $customer_email = '';
     public string $customer_phone = '';
+    public string $customer_phone_code = '+56';
+    public string $customer_phone_number = '';
     public string $address_street = '';
     public string $address_city = '';
     public string $address_commune = '';
@@ -109,7 +111,18 @@ class Cart extends Component
             $user = Auth::user();
             $this->customer_name = $user->name;
             $this->customer_email = $user->email;
-            $this->customer_phone = $user->phone ?? '';
+            
+            if ($user->phone) {
+                $this->customer_phone_number = $user->phone;
+                $prefixes = ['+56', '+54', '+55', '+57', '+34', '+1', '+52', '+51', '+598', '+58', '+593', '+591', '+595'];
+                foreach($prefixes as $prefix) {
+                    if (str_starts_with($user->phone, $prefix)) {
+                        $this->customer_phone_code = $prefix;
+                        $this->customer_phone_number = substr($user->phone, strlen($prefix));
+                        break;
+                    }
+                }
+            }
         }
         
         $geo = $this->loadGeoData();
@@ -143,18 +156,49 @@ class Cart extends Component
             return;
         }
 
+        // --- VERIFICACIÓN EN TIEMPO REAL CON RELBASE ---
+        if ($product->relbase_id) {
+            try {
+                $relbaseService = app(\App\Services\RelBaseService::class);
+                if ($relbaseService->syncProductById($product->relbase_id)) {
+                    $product->refresh();
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning("No se pudo validar stock en vivo para producto {$productId}");
+            }
+        }
+        
+        // Rechazo inmediato y estricto si se acabó el stock físicamente
+        if ($product->stock <= 0) {
+            $this->dispatch('swal', [
+                'title' => 'Agotado',
+                'text'  => 'No disponible en este momento. Alguien acaba de comprar la última unidad.',
+                'icon'  => 'error'
+            ]);
+            return;
+        }
+        // -----------------------------------------------
+
         $cart = session()->get('cart', []);
 
         if (isset($cart[$productId])) {
             // Check stock limits
             if ($cart[$productId]['quantity'] + $quantity > $product->stock) {
-                $this->dispatch('toast', variant: 'error', text: 'No hay suficiente stock disponible.');
+                $this->dispatch('swal', [
+                    'title' => 'Stock Insuficiente',
+                    'text'  => "Solo quedan {$product->stock} unidades disponibles en tiempo real.",
+                    'icon'  => 'warning'
+                ]);
                 return;
             }
             $cart[$productId]['quantity'] += $quantity;
         } else {
             if ($quantity > $product->stock) {
-                $this->dispatch('toast', variant: 'error', text: 'No hay suficiente stock disponible.');
+                $this->dispatch('swal', [
+                    'title' => 'Stock Insuficiente',
+                    'text'  => "Solo quedan {$product->stock} unidades disponibles.",
+                    'icon'  => 'warning'
+                ]);
                 return;
             }
             $cart[$productId] = [
@@ -201,8 +245,24 @@ class Cart extends Component
         $cart = session()->get('cart', []);
 
         if ($product && isset($cart[$productId])) {
+            
+            // --- VERIFICACIÓN EN TIEMPO REAL CON RELBASE ---
+            if ($product->relbase_id) {
+                try {
+                    $relbaseService = app(\App\Services\RelBaseService::class);
+                    if ($relbaseService->syncProductById($product->relbase_id)) {
+                        $product->refresh();
+                    }
+                } catch (\Exception $e) {}
+            }
+            // -----------------------------------------------
+
             if ($cart[$productId]['quantity'] + 1 > $product->stock) {
-                $this->dispatch('toast', variant: 'error', text: 'Máximo stock alcanzado.');
+                $this->dispatch('swal', [
+                    'title' => 'Stock Insuficiente',
+                    'text'  => "Solo quedan {$product->stock} unidades disponibles en RelBase.",
+                    'icon'  => 'warning'
+                ]);
                 return;
             }
             $cart[$productId]['quantity']++;
@@ -243,6 +303,7 @@ class Cart extends Component
 
     public function checkout(CreateMercadoPagoPreferenceAction $createPreferenceAction)
     {
+        $this->customer_phone = $this->customer_phone_code . ltrim($this->customer_phone_number, '0');
         $this->loadCart();
         
         if (empty($this->cartItems)) {
@@ -280,6 +341,13 @@ class Cart extends Component
                 $this->dispatch('toast', variant: 'error', text: "El producto {$item['name']} ya no tiene stock suficiente.");
                 return;
             }
+        }
+
+        // Idempotency Lock: Prevenir múltiples clics después de pasar todas las validaciones
+        $lockKey = 'checkout_lock_' . (\Illuminate\Support\Facades\Auth::id() ?? session()->getId());
+        if (!\Illuminate\Support\Facades\Cache::add($lockKey, true, 15)) {
+            // Si el candado ya existe, significa que ya hay un pago procesándose
+            return;
         }
 
         try {
