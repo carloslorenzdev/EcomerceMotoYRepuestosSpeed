@@ -50,9 +50,9 @@
                   </div>
                   <h3 class="text-base font-semibold text-gray-800 dark:text-neutral-200">El carro está vacío</h3>
                   <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">Aún no has agregado repuestos ni accesorios.</p>
-                  <button type="button" wire:click="closeCart" class="mt-6 inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg bg-orange-600 hover:bg-orange-700 text-white shadow-sm">
+                  <a href="{{ route('shop') }}" class="mt-6 inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg bg-orange-600 hover:bg-orange-700 text-white shadow-sm">
                     Ir a la tienda
-                  </button>
+                  </a>
                 </div>
               @else
                 <!-- Items list -->

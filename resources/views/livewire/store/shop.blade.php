@@ -133,9 +133,9 @@
                 <div class="group flex flex-col bg-white border border-gray-150 rounded-2xl overflow-hidden hover:shadow-lg transition dark:bg-neutral-850 dark:border-neutral-800">
                   <!-- Image Wrapper -->
                   <div class="aspect-square bg-gray-50 dark:bg-neutral-800 flex items-center justify-center relative overflow-hidden">
-                    @if (!empty($product->image_url))
+                    @if (!empty($product->visible_images))
                       <a href="{{ route('product.detail', $product->slug) }}" class="contents">
-                        <img src="{{ $product->image_url[0] }}" alt="{{ $product->name }}" class="object-cover size-full group-hover:scale-105 transition-transform duration-300">
+                        <img src="{{ $product->visible_images[0] }}" alt="{{ $product->name }}" class="object-cover size-full group-hover:scale-105 transition-transform duration-300">
                       </a>
                     @else
                       <a href="{{ route('product.detail', $product->slug) }}" class="contents">

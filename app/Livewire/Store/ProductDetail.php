@@ -34,7 +34,7 @@ class ProductDetail extends Component
 
     public function setActiveImage(int $index)
     {
-        if (isset($this->product->image_url[$index])) {
+        if (isset($this->product->visible_images[$index])) {
             $this->activeImageIndex = $index;
         }
     }

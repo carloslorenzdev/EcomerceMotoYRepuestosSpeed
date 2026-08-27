@@ -23,6 +23,7 @@ class Product extends Model
         'image_url',
         'category_id',
         'is_featured',
+        'hidden_images',
     ];
 
     protected $casts = [
@@ -30,6 +31,7 @@ class Product extends Model
         'compare_at_price' => 'decimal:2',
         'is_featured' => 'boolean',
         'image_url' => 'array', // automatically serialize/deserialize JSON lists of images
+        'hidden_images' => 'array',
         'stock' => 'integer',
     ];
 
@@ -58,6 +60,19 @@ class Product extends Model
                 }, $images);
             }
         );
+    }
+
+    /**
+     * Get only the visible images (not hidden).
+     */
+    public function getVisibleImagesAttribute(): array
+    {
+        $images = $this->image_url ?? [];
+        $hidden = $this->hidden_images ?? [];
+        
+        return array_values(array_filter($images, function($url) use ($hidden) {
+            return !in_array($url, $hidden);
+        }));
     }
 
     /**

@@ -269,17 +269,40 @@
                                                      \Illuminate\Support\Str::contains($url, 'rb_') || 
                                                      \Illuminate\Support\Str::contains($url, 'amazonaws.com') ||
                                                      \Illuminate\Support\Str::contains($url, 'relbase');
+                                        
+                                        $isHidden = in_array($url, $hidden_images);
                                     @endphp
-                                    <div class="relative group h-16 rounded-xl overflow-hidden border border-gray-150 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900">
+                                    <div class="relative group h-20 rounded-xl overflow-hidden border {{ $isHidden ? 'border-dashed border-red-300 opacity-50 grayscale hover:grayscale-0' : 'border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-900' }} transition-all">
                                         <img src="{{ $url }}" class="h-full w-full object-cover">
-                                        @if(!$isRelBase)
-                                            <button type="button" wire:click="removeImageUrl({{ $index }})" class="absolute top-1 right-1 p-1 rounded-full bg-red-600 text-white opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 transition-all shadow-xs">
-                                                <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
+                                        
+                                        <!-- Actions Overlay -->
+                                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 backdrop-blur-[1px]">
+                                            <!-- Toggle Visibility Button -->
+                                            <button type="button" wire:click.prevent="toggleImageVisibility('{{ $url }}')" class="p-1.5 rounded-lg bg-white/90 text-gray-800 hover:text-orange-600 hover:scale-110 hover:bg-white transition-all shadow-sm" title="{{ $isHidden ? 'Mostrar en tienda' : 'Ocultar de la tienda' }}">
+                                                @if($isHidden)
+                                                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                @else
+                                                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                                    </svg>
+                                                @endif
                                             </button>
-                                        @else
-                                            <div class="absolute top-1 right-1 p-1 rounded-full bg-gray-800/70 text-white" title="Imagen protegida por RelBase">
+                                            
+                                            <!-- Delete Button (Only for non-RelBase) -->
+                                            @if(!$isRelBase)
+                                                <button type="button" wire:click.prevent="removeImageUrl({{ $index }})" class="p-1.5 rounded-lg bg-red-600/90 text-white hover:bg-red-600 hover:scale-110 transition-all shadow-sm" title="Eliminar imagen">
+                                                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            @endif
+                                        </div>
+
+                                        @if($isRelBase)
+                                            <div class="absolute top-1 left-1 p-0.5 rounded-md bg-gray-900/60 text-white backdrop-blur-xs" title="Imagen protegida por RelBase">
                                                 <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                                 </svg>
@@ -293,12 +316,27 @@
                         @endif
 
                         <!-- Add new image file -->
-                        <div class="flex gap-2 items-center">
+                        <div class="flex gap-3 items-center mt-3" 
+                             x-data="{ isUploading: false, progress: 0 }" 
+                             x-on:livewire-upload-start="isUploading = true; progress = 0" 
+                             x-on:livewire-upload-finish="isUploading = false; progress = 100" 
+                             x-on:livewire-upload-error="isUploading = false" 
+                             x-on:livewire-upload-progress="progress = $event.detail.progress">
+                            
                             <input type="file" wire:model="newImage" accept="image/*" class="flex-1 px-3.5 py-2 text-xs rounded-xl border border-gray-200 bg-white text-gray-800 dark:border-neutral-750 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-orange-500 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 dark:file:bg-neutral-800 dark:file:text-orange-400">
                             
-                            <div wire:loading wire:target="newImage" class="text-xs text-orange-500 mr-2 font-bold animate-pulse">Cargando...</div>
+                            <!-- Progress Bar -->
+                            <div x-show="isUploading" class="flex-1 max-w-[120px]" style="display: none;">
+                                <div class="h-2 w-full bg-gray-200 dark:bg-neutral-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-orange-500 transition-all duration-300" :style="`width: ${progress}%`"></div>
+                                </div>
+                                <div class="mt-1 flex justify-between items-center text-[10px]">
+                                    <span class="text-orange-600 font-bold">Subiendo...</span>
+                                    <span class="text-gray-500 font-bold" x-text="`${progress}%`"></span>
+                                </div>
+                            </div>
                             
-                            <button type="button" wire:click="addImage" class="px-4 py-2 text-xs font-bold bg-neutral-900 dark:bg-neutral-850 hover:bg-orange-600 text-white rounded-xl transition">
+                            <button type="button" wire:click="addImage" x-bind:disabled="isUploading" class="px-5 py-2 text-sm font-bold bg-neutral-900 dark:bg-neutral-850 hover:bg-orange-600 text-white rounded-xl transition-colors disabled:opacity-50 shadow-sm">
                                 Subir
                             </button>
                         </div>

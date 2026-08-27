@@ -38,6 +38,7 @@ class Products extends Component
     public $is_featured = false;
     public $is_active = true;
     public $image_urls = [];
+    public $hidden_images = [];
     public $newImageUrl = '';
 
     protected $queryString = [
@@ -127,6 +128,7 @@ class Products extends Component
         $this->is_featured = $product->is_featured;
         $this->is_active = $product->is_active;
         $this->image_urls = $product->image_url ?? [];
+        $this->hidden_images = $product->hidden_images ?? [];
         $this->newImageUrl = '';
 
         $this->isEditModalOpen = true;
@@ -139,7 +141,10 @@ class Products extends Component
      */
     public function addImage()
     {
-        // Sin validaciones estrictas. Si hay archivo, forzamos el guardado.
+        $this->validate([
+            'newImage' => 'image|max:5120', // max 5MB
+        ]);
+
         if (!$this->newImage) {
             $this->addError('newImage', 'Debes seleccionar un archivo.');
             return;
@@ -161,8 +166,27 @@ class Products extends Component
     public function removeImageUrl($index)
     {
         if (isset($this->image_urls[$index])) {
+            $url = $this->image_urls[$index];
             unset($this->image_urls[$index]);
             $this->image_urls = array_values($this->image_urls);
+            
+            // Remove from hidden images if it was there
+            if (($key = array_search($url, $this->hidden_images)) !== false) {
+                unset($this->hidden_images[$key]);
+                $this->hidden_images = array_values($this->hidden_images);
+            }
+        }
+    }
+
+    /**
+     * Toggle visibility of an image.
+     */
+    public function toggleImageVisibility($url)
+    {
+        if (in_array($url, $this->hidden_images)) {
+            $this->hidden_images = array_values(array_diff($this->hidden_images, [$url]));
+        } else {
+            $this->hidden_images[] = $url;
         }
     }
 
@@ -197,6 +221,7 @@ class Products extends Component
             'is_featured' => $this->is_featured,
             'is_active' => $this->is_active,
             'image_url' => $this->image_urls,
+            'hidden_images' => $this->hidden_images,
         ]);
 
         // Se eliminó la sincronización hacia RelBase desde el panel de administración.

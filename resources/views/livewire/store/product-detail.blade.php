@@ -6,21 +6,21 @@
     <meta property="og:description" content="{{ $seoDesc }}" />
     <meta property="og:type" content="product" />
     <meta property="og:url" content="{{ request()->url() }}" />
-    @if(!empty($product->image_url))
-        <meta property="og:image" content="{{ $product->image_url[0] }}" />
+    @if(!empty($product->visible_images))
+        <meta property="og:image" content="{{ $product->visible_images[0] }}" />
     @endif
     
     <!-- JSON-LD Structured Data for Google -->
     <script type="application/ld+json">
     {
-      "@context": "https://schema.org/",
-      "@type": "Product",
+      "@@context": "https://schema.org/",
+      "@@type": "Product",
       "name": "{{ $product->name }}",
-      "image": {!! json_encode($product->image_url ?? []) !!},
+      "image": {!! json_encode($product->visible_images) !!},
       "description": "{{ $seoDesc }}",
       "sku": "{{ $product->sku }}",
       "offers": {
-        "@type": "Offer",
+        "@@type": "Offer",
         "url": "{{ request()->url() }}",
         "priceCurrency": "CLP",
         "price": "{{ $product->price }}",
@@ -63,13 +63,14 @@
                 <!-- Left: Image Gallery & Zoom -->
                 <div class="flex flex-col gap-4">
                     <!-- Main Image with Zoom effect -->
-                    @if(!empty($product->image_url))
-                        @php $activeImage = $product->image_url[$activeImageIndex] ?? $product->image_url[0]; @endphp
+                    @if(!empty($product->visible_images))
+                        @php $activeImage = $product->visible_images[$activeImageIndex] ?? $product->visible_images[0]; @endphp
                         <div x-data="{ zoom: false, x: 0, y: 0 }" 
-                             @mousemove="x = ($event.offsetX / $event.target.offsetWidth) * 100; y = ($event.offsetY / $event.target.offsetHeight) * 100"
-                             @mouseenter="zoom = true" 
+                             @mousemove="if(zoom) { x = ($event.offsetX / $event.target.offsetWidth) * 100; y = ($event.offsetY / $event.target.offsetHeight) * 100 }"
+                             @click="zoom = !zoom" 
                              @mouseleave="zoom = false"
-                             class="relative w-full aspect-square bg-gray-50 dark:bg-neutral-900 rounded-2xl overflow-hidden cursor-crosshair border border-gray-150 dark:border-neutral-800">
+                             :class="zoom ? 'cursor-zoom-out' : 'cursor-zoom-in'"
+                             class="relative w-full aspect-square bg-gray-50 dark:bg-neutral-900 rounded-2xl overflow-hidden border border-gray-150 dark:border-neutral-800">
                             
                             <!-- Base Image -->
                             <img :class="zoom ? 'opacity-0' : 'opacity-100'" 
@@ -80,15 +81,14 @@
                             <!-- Zoom Overlay -->
                             <div x-show="zoom" 
                                  class="absolute inset-0 pointer-events-none bg-no-repeat bg-white dark:bg-neutral-900" 
-                                 style="background-image: url('{{ $activeImage }}'); background-size: 200%;"
-                                 :style="`background-position: ${x}% ${y}%;`">
+                                 :style="`background-image: url('{{ $activeImage }}'); background-size: 200%; background-position: ${x}% ${y}%;`">
                             </div>
                         </div>
                         
                         <!-- Thumbnails Gallery -->
-                        @if(count($product->image_url) > 1)
+                        @if(count($product->visible_images) > 1)
                             <div class="grid grid-cols-5 gap-3 mt-2">
-                                @foreach($product->image_url as $index => $url)
+                                @foreach($product->visible_images as $index => $url)
                                     <button type="button" wire:click="setActiveImage({{ $index }})" 
                                             class="aspect-square rounded-xl overflow-hidden border-2 transition-all {{ $activeImageIndex === $index ? 'border-orange-500 opacity-100 ring-2 ring-orange-500/20' : 'border-gray-200 dark:border-neutral-800 opacity-60 hover:opacity-100 hover:border-gray-300 dark:hover:border-neutral-600' }}">
                                         <img src="{{ $url }}" class="w-full h-full object-cover">
@@ -195,9 +195,9 @@
                     @foreach($relatedProducts as $related)
                         <div class="group flex flex-col bg-white border border-gray-150 rounded-2xl overflow-hidden hover:shadow-lg transition dark:bg-neutral-850 dark:border-neutral-800">
                             <div class="aspect-square bg-gray-50 dark:bg-neutral-800 flex items-center justify-center relative overflow-hidden">
-                                @if (!empty($related->image_url))
+                                @if (!empty($related->visible_images))
                                     <a href="{{ route('product.detail', $related->slug) }}" class="contents">
-                                        <img src="{{ $related->image_url[0] }}" alt="{{ $related->name }}" class="object-cover size-full group-hover:scale-105 transition-transform duration-300">
+                                        <img src="{{ $related->visible_images[0] }}" alt="{{ $related->name }}" class="object-cover size-full group-hover:scale-105 transition-transform duration-300">
                                     </a>
                                 @else
                                     <a href="{{ route('product.detail', $related->slug) }}" class="contents">
