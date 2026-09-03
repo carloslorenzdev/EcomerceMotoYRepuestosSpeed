@@ -316,7 +316,7 @@
                                 
                                 <div class="rounded-xl p-4" style="background-color: #f9fafb; border: 1px solid #f3f4f6;">
                                     <p class="font-semibold" style="color: #111827;">
-                                        Este eCommerce se encuentra en un periodo de disponibilidad condicional y estará activo hasta el <span class="font-black text-base" style="color: #ea580c;">31 de agosto</span>.
+                                        Este eCommerce se encuentra en un periodo de disponibilidad condicional y estará activo hasta el <span class="font-black text-base" style="color: #ea580c;">20 de septiembre</span>.
                                     </p>
                                 </div>
                                 
