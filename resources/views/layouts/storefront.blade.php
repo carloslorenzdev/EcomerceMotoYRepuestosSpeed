@@ -7,8 +7,23 @@
         <!-- Base SEO -->
         <title>@yield('title', filled($title ?? null) ? $title.' | Motos y Repuestos Speed' : 'Motos y Repuestos Speed | Taller Mecánico y Repuestos')</title>
         <meta name="description" content="@yield('meta_description', 'Motos y Repuestos Speed. Encuentra los mejores repuestos, accesorios y el mejor servicio técnico para tu motocicleta.')">
-        <link rel="icon" href="{{ asset('favicon.svg') }}?v={{ time() }}" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <meta property="og:site_name" content="Motos y Repuestos Speed">
+        
+        <!-- Google & Browser Favicons -->
+        <link rel="icon" href="{{ asset('favicon.svg') }}?v=2" type="image/svg+xml">
+        <link rel="icon" href="{{ asset('apple-touch-icon.png') }}" type="image/png">
+        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+        
+        <!-- Google Search Name Schema -->
+        <script type="application/ld+json">
+        {
+          "@@context": "https://schema.org",
+          "@@type": "WebSite",
+          "name": "Motos y Repuestos Speed",
+          "alternateName": ["Motos Speed", "Motos y Repuestos Speed Rancagua"],
+          "url": "https://www.motosspeed.cl"
+        }
+        </script>
         
         <!-- Dynamic Meta Tags (Open Graph, JSON-LD) -->
         @stack('meta')
