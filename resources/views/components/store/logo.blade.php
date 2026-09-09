@@ -1,121 +1,185 @@
 @props([
     'class' => 'w-full h-auto',
-    'textColor' => '#e2e8f0'
 ])
 @php
     $uid = Str::random(8);
-    $redGrad = "redGrad-{$uid}";
-    $silverGrad = "silverGrad-{$uid}";
-    $blackGrad = "blackGrad-{$uid}";
-    $dropShadow = "dropShadow-{$uid}";
-    $textShadow = "textShadow-{$uid}";
+    $chrome3D = "chrome3D-{$uid}";
+    $chromeBevelTop = "chromeBevelTop-{$uid}";
+    $chromeBevelBottom = "chromeBevelBottom-{$uid}";
+    $redShield = "redShield-{$uid}";
+    $redStars = "redStars-{$uid}";
+    $shadow3D = "shadow3D-{$uid}";
+    $neonRed = "neonRed-{$uid}";
 @endphp
-<svg viewBox="0 0 800 620" class="{{ $class }}" xmlns="http://www.w3.org/2000/svg" {{ $attributes }}>
+<svg viewBox="0 0 1000 650" class="{{ $class }}" xmlns="http://www.w3.org/2000/svg" {{ $attributes }}>
   <defs>
-    <linearGradient id="{{ $redGrad }}" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ff1a1a" />
-      <stop offset="50%" stop-color="#cc0000" />
-      <stop offset="100%" stop-color="#660000" />
-    </linearGradient>
-    
-    <linearGradient id="{{ $silverGrad }}" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="40%" stop-color="#b3b3b3" />
-      <stop offset="50%" stop-color="#808080" />
-      <stop offset="60%" stop-color="#cccccc" />
-      <stop offset="100%" stop-color="#4d4d4d" />
+    <!-- Gradientes Metálicos Cromados (Cromado Automotriz con línea de horizonte) -->
+    <linearGradient id="{{ $chrome3D }}" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="18%" stop-color="#e2e8f0"/>
+      <stop offset="48%" stop-color="#64748b"/>
+      <stop offset="50%" stop-color="#1e293b"/>
+      <stop offset="52%" stop-color="#334155"/>
+      <stop offset="70%" stop-color="#94a3b8"/>
+      <stop offset="90%" stop-color="#cbd5e1"/>
+      <stop offset="100%" stop-color="#475569"/>
     </linearGradient>
 
-    <linearGradient id="{{ $blackGrad }}" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#1a1a1a" />
-      <stop offset="100%" stop-color="#000000" />
+    <!-- Bisel Cromado Superior -->
+    <linearGradient id="{{ $chromeBevelTop }}" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#cbd5e1"/>
+      <stop offset="70%" stop-color="#64748b"/>
+      <stop offset="100%" stop-color="#1e293b"/>
     </linearGradient>
 
-    <filter id="{{ $dropShadow }}" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.8"/>
+    <!-- Bisel Cromado Inferior -->
+    <linearGradient id="{{ $chromeBevelBottom }}" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="30%" stop-color="#94a3b8"/>
+      <stop offset="50%" stop-color="#334155"/>
+      <stop offset="85%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+
+    <!-- Rojo Metálico Brillante -->
+    <linearGradient id="{{ $redShield }}" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff2222"/>
+      <stop offset="30%" stop-color="#dc2626"/>
+      <stop offset="70%" stop-color="#991b1b"/>
+      <stop offset="100%" stop-color="#450a0a"/>
+    </linearGradient>
+
+    <linearGradient id="{{ $redStars }}" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff4444"/>
+      <stop offset="50%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#7f1d1d"/>
+    </linearGradient>
+
+    <!-- Filtros de Sombra 3D -->
+    <filter id="{{ $shadow3D }}" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000000" flood-opacity="0.85"/>
     </filter>
-    <filter id="{{ $textShadow }}" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="5" stdDeviation="3" flood-color="#000" flood-opacity="0.9"/>
+
+    <filter id="{{ $neonRed }}" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3.5" result="glow"/>
+      <feComposite in="SourceGraphic" in2="glow" operator="over"/>
     </filter>
   </defs>
 
-  <!-- Outer Red Shield -->
-  <path 
-    d="M 50 180 L 400 120 L 750 180 L 750 300 Q 750 480 400 550 Q 50 480 50 300 Z" 
-    fill="url(#{{ $redGrad }})" 
-    stroke="#400000" 
-    stroke-width="4"
-    filter="url(#{{ $dropShadow }})"
-  />
+  <g transform="translate(0, 10)">
+    <!-- ================= 1. ESCUDO ROJO SUPERIOR (TEJADO) ================= -->
+    <path d="M 155 130 L 500 68 L 845 130 L 815 168 L 500 110 L 185 168 Z" 
+          fill="url(#{{ $redShield }})" filter="url(#{{ $shadow3D }})" stroke="#450a0a" stroke-width="2"/>
+    <path d="M 155 130 L 500 68 L 845 130" fill="none" stroke="#fca5a5" stroke-width="3"/>
+    <path d="M 500 68 L 500 110" fill="none" stroke="#fecaca" stroke-width="3"/>
 
-  <!-- Silver Border -->
-  <path 
-    d="M 70 195 L 400 140 L 730 195 L 730 295 Q 730 460 400 520 Q 70 460 70 295 Z" 
-    fill="url(#{{ $silverGrad }})" 
-  />
+    <!-- ================= 2. ESCUDO ROJO INFERIOR ================= -->
+    <path d="M 140 330 Q 240 470 500 525 Q 760 470 860 330 L 830 330 Q 745 455 500 490 Q 255 455 170 330 Z" 
+          fill="url(#{{ $redShield }})" filter="url(#{{ $shadow3D }})" stroke="#450a0a" stroke-width="2"/>
+    <path d="M 140 330 Q 240 470 500 525 Q 760 470 860 330" fill="none" stroke="#ef4444" stroke-width="2"/>
+    <path d="M 500 490 L 500 525" fill="none" stroke="#fca5a5" stroke-width="3"/>
 
-  <!-- Inner Black Shield -->
-  <path 
-    d="M 85 210 L 400 160 L 715 210 L 715 290 Q 715 440 400 495 Q 85 440 85 290 Z" 
-    fill="url(#{{ $blackGrad }})" 
-  />
+    <!-- ================= 3. MARCO CROMADO SUPERIOR CON ALAS ================= -->
+    <path d="M 125 186 L 205 186 L 245 158 L 500 102 L 755 158 L 795 186 L 875 186 L 860 200 L 785 200 L 750 174 L 500 120 L 250 174 L 215 200 L 140 200 Z" 
+          fill="url(#{{ $chromeBevelTop }})" stroke="#090d16" stroke-width="2" filter="url(#{{ $shadow3D }})"/>
+    <path d="M 125 186 L 500 102 L 875 186" fill="none" stroke="#ffffff" stroke-width="2.5" opacity="0.95"/>
+    <path d="M 500 102 L 500 120" fill="none" stroke="#ffffff" stroke-width="3"/>
 
-  <!-- 5 Stars -->
-  <g fill="#ff1a1a" filter="url(#{{ $dropShadow }})">
-    <path transform="translate(385, 175) scale(1.25)" d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z" />
-    <path transform="translate(340, 185) scale(1)" d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z" />
-    <path transform="translate(436, 185) scale(1)" d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z" />
-    <path transform="translate(300, 195) scale(0.8)" d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z" />
-    <path transform="translate(480, 195) scale(0.8)" d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z" />
-  </g>
+    <!-- ================= 4. MARCO CROMADO INFERIOR ================= -->
+    <path d="M 115 330 Q 225 455 500 486 Q 775 455 885 330 L 862 318 Q 762 430 500 458 Q 238 430 138 318 Z" 
+          fill="url(#{{ $chromeBevelBottom }})" stroke="#090d16" stroke-width="2" filter="url(#{{ $shadow3D }})"/>
+    <path d="M 138 318 Q 238 430 500 458 Q 762 430 862 318" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.95"/>
+    <path d="M 500 458 L 500 486" fill="none" stroke="#ffffff" stroke-width="3.5"/>
 
-  <!-- SPEED Text -->
-  <g transform="translate(400, 340)" filter="url(#{{ $textShadow }})">
-    <text 
-      x="0" 
-      y="0" 
-      text-anchor="middle" 
-      font-family="Arial Black, Impact, sans-serif" 
-      font-size="140" 
-      font-weight="900" 
-      fill="url(#{{ $silverGrad }})" 
-      stroke="#1a1a1a" 
-      stroke-width="3" 
-      letter-spacing="8"
-      transform="scale(1.3, 1)"
-    >
-      SPEED
-    </text>
-  </g>
+    <!-- ================= 5. LAS 5 ESTRELLAS ROJAS ================= -->
+    <g filter="url(#{{ $shadow3D }})">
+      <polygon points="500,128 507,144 525,144 510,155 516,171 500,161 484,171 490,155 475,144 493,144" fill="url(#{{ $redStars }})" stroke="#fecaca" stroke-width="0.6"/>
+      <polygon points="440,148 445,161 459,161 448,170 452,183 440,175 428,183 432,170 421,161 435,161" fill="url(#{{ $redStars }})" stroke="#fecaca" stroke-width="0.6"/>
+      <polygon points="560,148 565,161 579,161 568,170 572,183 560,175 548,183 552,170 541,161 555,161" fill="url(#{{ $redStars }})" stroke="#fecaca" stroke-width="0.6"/>
+      <polygon points="380,166 384,176 395,176 386,183 389,193 380,187 371,193 374,183 365,176 376,176" fill="url(#{{ $redStars }})" stroke="#fecaca" stroke-width="0.6"/>
+      <polygon points="620,166 624,176 635,176 626,183 629,193 620,187 611,193 614,183 605,176 616,176" fill="url(#{{ $redStars }})" stroke="#fecaca" stroke-width="0.6"/>
+    </g>
 
-  <!-- Dirt Bike Silhouette -->
-  <g transform="translate(325, 360) scale(3)" fill="#ff1a1a" filter="url(#{{ $dropShadow }})">
-    <!-- Llantas -->
-    <circle cx="12" cy="24" r="5" fill="none" stroke="#ff1a1a" stroke-width="2.5"/>
-    <circle cx="38" cy="24" r="5" fill="none" stroke="#ff1a1a" stroke-width="2.5"/>
-    <!-- Chasis -->
-    <path d="M 12 24 L 20 14 L 32 14 L 38 24 M 20 14 L 25 4 L 30 4 M 32 14 L 25 4 L 15 12" stroke="#ff1a1a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <path d="M 15 12 C 22 10 28 10 34 14 L 35 16 L 16 16 Z" fill="#ff1a1a"/>
-    <!-- Manubrio -->
-    <path d="M 30 4 L 35 1" stroke="#ff1a1a" stroke-width="2" stroke-linecap="round"/>
-    <!-- Guardabarros -->
-    <path d="M 35 16 Q 40 16 45 20" stroke="#ff1a1a" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M 16 16 Q 10 16 5 20" stroke="#ff1a1a" stroke-width="2" fill="none" stroke-linecap="round"/>
-  </g>
+    <!-- ================= 6. TEXTO "SPEED" EXACTO ================= -->
+    <g id="SPEED-TEXT" filter="url(#{{ $shadow3D }})">
+      <!-- Letra S -->
+      <path d="M 235 228 C 215 228 175 238 160 252 C 145 268 140 286 148 300 C 158 316 182 322 215 328 C 248 334 256 340 256 348 C 256 358 242 366 220 366 C 185 366 160 354 140 338 L 132 364 C 156 382 188 392 222 392 C 255 392 284 382 292 364 C 298 350 292 334 278 322 C 265 312 245 306 215 300 C 182 294 175 288 175 280 C 175 270 190 256 222 256 C 250 256 272 264 286 276 L 294 248 C 275 234 252 228 235 228 Z" 
+            fill="url(#{{ $chrome3D }})" stroke="#090d16" stroke-width="2.5" />
+      <path d="M 235 231 C 217 231 180 240 166 254 C 153 268 148 284 154 296 C 163 310 185 316 217 322 C 248 328 259 336 259 346 C 259 354 245 362 222 362 C 190 362 166 351 148 337" 
+            fill="none" stroke="#ffffff" stroke-width="2" opacity="0.9"/>
 
-  <!-- Bottom Text -->
-  <g transform="translate(400, 600)">
-    <text 
-      x="0" 
-      y="0" 
-      text-anchor="middle" 
-      font-family="Montserrat, Arial, sans-serif" 
-      font-size="36" 
-      font-weight="bold" 
-      fill="{{ $textColor }}" 
-      letter-spacing="6"
-    >
-      — MOTOS Y REPUESTOS —
-    </text>
+      <!-- Letra P -->
+      <path d="M 315 232 L 390 232 C 425 232 448 250 448 280 C 448 310 425 328 390 328 L 352 328 L 352 388 L 315 388 Z M 352 258 L 352 302 L 388 302 C 406 302 418 294 418 280 C 418 266 406 258 388 258 Z" 
+            fill="url(#{{ $chrome3D }})" stroke="#090d16" stroke-width="2.5" />
+      <path d="M 317 235 L 388 235 C 420 235 442 251 442 278" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.9"/>
+
+      <!-- Primera Letra E -->
+      <path d="M 470 232 L 565 232 L 565 260 L 507 260 L 507 294 L 555 294 L 555 320 L 507 320 L 507 360 L 568 360 L 568 388 L 470 388 Z" 
+            fill="url(#{{ $chrome3D }})" stroke="#090d16" stroke-width="2.5" />
+      <path d="M 472 235 L 562 235 L 562 257 L 510 257 L 510 297 L 552 297" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.9"/>
+
+      <!-- Segunda Letra E -->
+      <path d="M 590 232 L 685 232 L 685 260 L 627 260 L 627 294 L 675 294 L 675 320 L 627 320 L 627 360 L 688 360 L 688 388 L 590 388 Z" 
+            fill="url(#{{ $chrome3D }})" stroke="#090d16" stroke-width="2.5" />
+      <path d="M 592 235 L 682 235 L 682 257 L 630 257 L 630 297 L 672 297" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.9"/>
+
+      <!-- Letra D -->
+      <path d="M 708 232 L 778 232 C 832 232 875 262 875 310 C 875 358 832 388 778 388 L 708 388 Z M 744 260 L 744 360 L 775 360 C 808 360 838 340 838 310 C 838 280 808 260 775 260 Z" 
+            fill="url(#{{ $chrome3D }})" stroke="#090d16" stroke-width="2.5" />
+      <path d="M 710 235 L 775 235 C 825 235 868 263 868 308" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.9"/>
+    </g>
+
+    <!-- ================= 7. SILUETA MOTO CROSS EN ROJO BRILLANTE ================= -->
+    <g id="MOTO-CROSS" transform="translate(450, 360) scale(2.0)" filter="url(#{{ $shadow3D }})">
+      <circle cx="10" cy="22" r="8" fill="none" stroke="#ff0000" stroke-width="2.2" filter="url(#{{ $neonRed }})"/>
+      <circle cx="40" cy="22" r="8" fill="none" stroke="#ff0000" stroke-width="2.2" filter="url(#{{ $neonRed }})"/>
+
+      <circle cx="10" cy="22" r="6.5" fill="#000" stroke="#ff2222" stroke-width="2.5"/>
+      <circle cx="40" cy="22" r="6.5" fill="#000" stroke="#ff2222" stroke-width="2.5"/>
+      <circle cx="10" cy="22" r="2" fill="#ff6666"/>
+      <circle cx="40" cy="22" r="2" fill="#ff6666"/>
+
+      <path d="M 10 22 L 20 16 L 27 16 L 40 22" fill="none" stroke="#ff1111" stroke-width="3" stroke-linecap="round"/>
+      <path d="M 22 17 L 31 5 L 34 5" fill="none" stroke="#ff2222" stroke-width="2.8" stroke-linecap="round"/>
+      <path d="M 29 4 L 35 6" fill="none" stroke="#ff5555" stroke-width="3" stroke-linecap="round"/>
+      <path d="M 16 12 C 20 10 24 10 29 12 L 32 15 L 20 16 Z" fill="#ff0000"/>
+      <path d="M 30 11 Q 36 10 42 13" fill="none" stroke="#ff2222" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M 17 12 Q 12 13 8 16" fill="none" stroke="#ff2222" stroke-width="2.2" stroke-linecap="round"/>
+      <rect x="20" y="16" width="7" height="6" rx="1.5" fill="#cc0000"/>
+    </g>
+
+    <!-- ================= 8. TEXTO INFERIOR "— MOTOS Y REPUESTOS —" ================= -->
+    <g id="BOTTOM-TEXT" filter="url(#{{ $shadow3D }})">
+      <path d="M 135 550 L 195 550" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/>
+      <path d="M 135 549 L 195 549" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+
+      <text x="500" y="562" 
+            text-anchor="middle" 
+            font-family="'Montserrat', 'Arial Black', sans-serif" 
+            font-size="38" 
+            font-weight="900" 
+            letter-spacing="12" 
+            fill="url(#{{ $chrome3D }})"
+            stroke="#090d16"
+            stroke-width="1.8">
+        MOTOS Y REPUESTOS
+      </text>
+      <text x="500" y="560" 
+            text-anchor="middle" 
+            font-family="'Montserrat', 'Arial Black', sans-serif" 
+            font-size="38" 
+            font-weight="900" 
+            letter-spacing="12" 
+            fill="none"
+            stroke="#ffffff"
+            stroke-width="0.8"
+            opacity="0.9">
+        MOTOS Y REPUESTOS
+      </text>
+
+      <path d="M 805 550 L 865 550" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/>
+      <path d="M 805 549 L 865 549" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+    </g>
   </g>
 </svg>

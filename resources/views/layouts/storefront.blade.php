@@ -10,9 +10,9 @@
         <meta property="og:site_name" content="Motos y Repuestos Speed">
         
         <!-- Google & Browser Favicons -->
-        <link rel="icon" href="{{ asset('favicon.svg') }}?v=2" type="image/svg+xml">
-        <link rel="icon" href="{{ asset('apple-touch-icon.png') }}" type="image/png">
-        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+        <link rel="icon" href="{{ asset('favicon.svg') }}?v=3" type="image/svg+xml">
+        <link rel="icon" href="{{ asset('apple-touch-icon.png') }}?v=3" type="image/png">
+        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=3">
         
         <!-- Google Search Name Schema -->
         <script type="application/ld+json">
