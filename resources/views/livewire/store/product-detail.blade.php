@@ -5,7 +5,8 @@
     <meta property="og:title" content="{{ $product->name }} | Motos y Repuestos Speed" />
     <meta property="og:description" content="{{ $seoDesc }}" />
     <meta property="og:type" content="product" />
-    <meta property="og:url" content="{{ request()->url() }}" />
+    <meta property="og:url" content="https://www.motosspeed.cl/producto/{{ $product->slug }}" />
+    <link rel="canonical" href="https://www.motosspeed.cl/producto/{{ $product->slug }}" />
     @if(!empty($product->visible_images))
         <meta property="og:image" content="{{ $product->visible_images[0] }}" />
     @endif

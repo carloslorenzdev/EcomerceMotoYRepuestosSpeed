@@ -7,6 +7,7 @@
         <!-- Base SEO -->
         <title>@yield('title', filled($title ?? null) ? $title.' | Motos y Repuestos Speed' : 'Motos y Repuestos Speed | Taller Mecánico y Repuestos')</title>
         <meta name="description" content="@yield('meta_description', 'Motos y Repuestos Speed. Encuentra los mejores repuestos, accesorios y el mejor servicio técnico para tu motocicleta.')">
+        <link rel="canonical" href="@yield('canonical', 'https://www.motosspeed.cl'.request()->getPathInfo())" />
         <meta property="og:site_name" content="Motos y Repuestos Speed">
         
         <!-- Google & Browser Favicons -->
